@@ -1,0 +1,39 @@
+# ==========================================
+# G-Monitor Diskoperindag Banyuasin - .gitignore
+# ==========================================
+
+# Node modules & dependencies
+node_modules/
+package-lock.json.bak
+
+# Logs & Error files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Sensitive credentials & environment
+.env
+.env.*
+.clasprc.json
+credentials.json
+token.json
+
+# Operating System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE & Editor folders
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.swp
+*.swo
+
+# Temporary build / scratch artifacts
+scratch/
+*.tmp

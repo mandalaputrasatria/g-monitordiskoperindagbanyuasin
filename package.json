@@ -1,0 +1,24 @@
+{
+  "name": "pjr-1-final-lanjutan-gvmonitor-151026",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "push": "clasp push",
+    "pull": "clasp pull",
+    "login": "clasp login",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.3.0",
+    "ws": "^8.22.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@google/clasp": "^3.4.1"
+  }
+}

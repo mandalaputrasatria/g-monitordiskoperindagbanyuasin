@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Workspace: Monitoring Staf, Dikte Suara & Arsip Drive</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            heading: ['Outfit', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Google Fonts & FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- AUDIO ELEMENT UNTUK AZAN -->
+  <audio id="azanAudioPlayer" preload="none"></audio>
+
+  <!-- BANNER NOTIFIKASI WAKTU SHOLAT & AZAN (BANYUASIN) -->
+  <div id="azanFloatingAlert" class="hidden fixed bottom-6 right-6 z-50 max-w-md bg-emerald-950/95 border-2 border-emerald-400 text-white p-4 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-4 animate-bounce">
+    <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300 text-2xl shrink-0">
+      <i class="fa-solid fa-mosque"></i>
+    </div>
+    <div class="flex-1">
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 text-[10px] font-bold uppercase bg-emerald-500 text-slate-950 rounded-full">Waktu Sholat Tiba</span>
+        <span class="text-xs text-emerald-300">Kabupaten Banyuasin</span>
+      </div>
+      <h4 class="font-bold text-base mt-0.5">Saatnya Adzan Berkumandang</h4>
+      <p class="text-xs text-emerald-200/80">Mikrofon dikte suara di-pause otomatis selama waktu sholat.</p>
+    </div>
+    <button type="button" onclick="stopAzanSound()" class="px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl shrink-0 transition">
+      <i class="fa-solid fa-stop mr-1"></i> Hentikan
+    </button>
+  </div>
+
+  <!-- FLOATING BANNER BROADCAST MEMO ADMIN -->
+  <div id="broadcastFloatingBanner" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-50 max-w-xl w-full px-4">
+    <div class="bg-indigo-900/95 border-2 border-indigo-400 text-white p-4 rounded-2xl shadow-2xl backdrop-blur-md flex items-start gap-3">
+      <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400 flex items-center justify-center text-indigo-300 text-xl shrink-0">
+        <i class="fa-solid fa-bullhorn"></i>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-indigo-300 uppercase tracking-wider" id="broadcastSender">Administrator</span>
+          <span class="text-[10px] text-slate-300 font-mono" id="broadcastTime">08:00</span>
+        </div>
+        <p class="text-sm font-semibold mt-1 text-white" id="broadcastText">Pesan Pengumuman</p>
+      </div>
+      <button type="button" onclick="closeAnnouncementAlert()" class="text-indigo-300 hover:text-white text-sm p-1">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       GLOBAL SMART TOP BAR (JAM REALTIME, SHOLAT, CUACA & TEMA)
+       ===================================================================== -->
+  <header id="globalSmartBar" class="bg-white/90 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800/80 px-4 py-2 sticky top-0 z-40 backdrop-blur-md transition">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+      
+      <!-- Kiri: Identitas Lokasi & Jam Digital Real-Time WIB -->
+      <div class="flex items-center gap-2.5">
+        <span class="px-3 py-1 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-location-dot text-indigo-500"></i>
+          <span>Banyuasin, Sumsel</span>
+        </span>
+        <div class="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 font-mono-clock font-bold text-slate-800 dark:text-white flex items-center gap-1.5 shadow-sm">
+          <i class="fa-regular fa-clock text-emerald-500"></i>
+          <span id="realtimeClock" class="text-sm">00:00:00</span>
+          <span class="text-[10px] text-slate-400 font-normal">WIB</span>
+        </div>
+      </div>
+
+      <!-- Kanan: Jadwal Sholat, Cuaca & Air Quality, Dark/Light Mode -->
+      <div class="flex flex-wrap items-center gap-2">
+
+        <!-- 1. Jadwal Sholat & Azan Dropdown -->
+        <div class="relative">
+          <div class="flex items-center bg-emerald-500/10 border border-emerald-500/30 rounded-xl overflow-hidden shadow-sm">
+            <button type="button" onclick="toggleDropdown('prayerDropdown')" class="px-3 py-1.5 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/10 flex items-center gap-2 font-medium transition">
+              <i class="fa-solid fa-mosque text-emerald-500"></i>
+              <span id="nextPrayerName" class="font-bold">Subuh</span>
+              <span id="nextPrayerCountdown" class="font-mono-clock text-[11px] bg-emerald-500/20 px-2 py-0.5 rounded text-emerald-800 dark:text-emerald-200">--:--:--</span>
+              <i class="fa-solid fa-chevron-down text-[10px]"></i>
+            </button>
+            <button type="button" onclick="testPlayAzan()" title="Uji Suara Azan Sekarang" class="px-2.5 py-1.5 border-l border-emerald-500/30 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500 hover:text-white transition">
+              <i class="fa-solid fa-volume-high"></i>
+            </button>
+            <button type="button" onclick="toggleAzanMute()" title="Mute/Unmute Notifikasi Azan" class="px-2.5 py-1.5 border-l border-emerald-500/30 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500/20 transition">
+              <i id="iconMuteAzan" class="fa-solid fa-bell"></i>
+            </button>
+          </div>
+
+          <!-- Dropdown Popover Jadwal Sholat -->
+          <div id="prayerDropdown" class="hidden absolute right-0 mt-2 w-80 glass-panel border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-4 z-50 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2.5">
+              <div>
+                <h4 class="font-bold text-slate-800 dark:text-white text-sm flex items-center gap-1.5">
+                  <i class="fa-solid fa-mosque text-emerald-500"></i>
+                  <span>Jadwal Sholat Digital</span>
+                </h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Metode Kemenag RI • Kab. Banyuasin</p>
+              </div>
+            </div>
+            <div id="prayerTimesList" class="grid grid-cols-2 gap-1.5 text-xs"></div>
+          </div>
+        </div>
+
+        <!-- 2. Cuaca & Kualitas Udara (US AQI & PM2.5) -->
+        <div class="relative">
+          <button type="button" onclick="toggleDropdown('weatherDropdown')" class="px-3 py-1.5 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 rounded-xl text-sky-700 dark:text-sky-300 flex items-center gap-2 font-medium transition shadow-sm">
+            <i class="fa-solid fa-cloud-sun text-amber-400"></i>
+            <span id="compactTemp" class="font-bold">--°C</span>
+            <span class="text-slate-400">|</span>
+            <span id="compactAqiBadge" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-300">AQI --</span>
+            <i class="fa-solid fa-chevron-down text-[10px]"></i>
+          </button>
+
+          <!-- Dropdown Cuaca -->
+          <div id="weatherDropdown" class="hidden absolute right-0 mt-2 w-80 glass-panel border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-4 z-50 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2.5">
+              <div>
+                <h4 class="font-bold text-slate-800 dark:text-white text-sm">Cuaca & Kualitas Udara</h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Kabupaten Banyuasin, Sumatera Selatan</p>
+              </div>
+              <button type="button" onclick="fetchWeatherAndAirQuality()" class="text-slate-400 hover:text-sky-400" title="Segarkan">
+                <i class="fa-solid fa-rotate"></i>
+              </button>
+            </div>
+            <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-900/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+              <div>
+                <span class="text-xs font-semibold text-sky-500">Cerah Berawan</span>
+                <div class="text-2xl font-bold text-slate-800 dark:text-white mt-0.5" id="detailTempMain">--°C</div>
+                <div class="text-[11px] text-slate-500 dark:text-slate-400">Terasa seperti: <b id="detailFeelsLike">--°C</b></div>
+              </div>
+              <i class="fa-solid fa-cloud-sun text-4xl text-amber-400"></i>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-center text-xs">
+              <div class="bg-slate-100 dark:bg-slate-900/60 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
+                <span class="text-[10px] text-slate-400 block">Indeks US AQI</span>
+                <b id="detailUsAqi" class="text-emerald-500 font-bold text-sm">--</b>
+              </div>
+              <div class="bg-slate-100 dark:bg-slate-900/60 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
+                <span class="text-[10px] text-slate-400 block">Partikel PM2.5</span>
+                <b id="detailPm25" class="text-slate-800 dark:text-white font-bold text-sm">--</b>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Dark / Light Mode Toggle -->
+        <button type="button" onclick="toggleThemeMode()" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5 font-medium shadow-sm">
+          <i id="themeIcon" class="fa-solid fa-moon"></i>
+          <span id="themeText" class="hidden sm:inline">Dark</span>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       1. HALAMAN LOGIN EXECUTIVE SPLIT-SCREEN
+       ===================================================================== -->
+  <section id="loginSection" class="flex-1 flex flex-col lg:flex-row min-h-[calc(100vh-50px)] overflow-hidden">
+    
+    <!-- SISI KIRI (60%): BRANDING KANTOR & FOTO HERO -->
+    <div class="relative lg:w-7/12 min-h-[300px] lg:min-h-full flex flex-col justify-between p-8 lg:p-14 text-white overflow-hidden">
+      <!-- Background Foto Kantor dengan Animasi Zoom Halus -->
+      <img id="loginBgImage" src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80"
+        alt="Background Kantor"
+        class="bg-office-zoom absolute inset-0 w-full h-full object-cover object-center z-0">
+      
+      <!-- Lapisan Gradasi Elegan -->
+      <div class="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/80 to-indigo-950/90 z-10"></div>
+
+      <!-- Konten Atas -->
+      <div class="relative z-20 flex items-center justify-between">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-emerald-300 shadow-lg">
+          <span class="lamp-online"></span>
+          <span>Sistem Smart Office Terpadu • Localhost & Cloud Sync</span>
+        </div>
+      </div>
+
+      <!-- Konten Tengah: Logo Kantor, Judul & Slogan -->
+      <div class="relative z-20 my-8 max-w-2xl space-y-6">
+        <div class="flex items-center gap-5">
+          <div class="w-20 h-20 lg:w-24 lg:h-24 rounded-2xl bg-white/15 backdrop-blur-md border-2 border-white/30 p-2.5 shadow-2xl flex items-center justify-center shrink-0 overflow-hidden">
+            <img id="loginLogoLarge" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Logo Kantor" class="w-full h-full object-contain">
+          </div>
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-indigo-300 block">Sistem Manajemen & Monitoring Pegawai</span>
+            <h1 id="loginOfficeName" class="text-2xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight mt-1 font-heading">
+              PORTAL KERJA & MONITORING DIGITAL
+            </h1>
+          </div>
+        </div>
+
+        <p id="loginOfficeTagline" class="text-sm lg:text-base text-slate-200/90 leading-relaxed border-l-4 border-emerald-400 pl-4 font-normal">
+          Sistem Manajemen Dokumen Spreadsheet, Asisten Dikte Suara Pintar (id-ID) & Pengarsipan Tahunan Otomatis Google Drive.
+        </p>
+
+        <!-- 3 Kartu Keunggulan Sistem -->
+        <div class="grid grid-cols-3 gap-3 pt-2">
+          <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3.5 hover:bg-white/15 transition shadow-lg">
+            <i class="fa-solid fa-table-cells-large text-emerald-400 text-xl mb-1.5 block"></i>
+            <div class="text-xs font-bold font-heading">Real-Time Grid</div>
+            <div class="text-[11px] text-slate-300">1 Staf 1 File Kerja</div>
+          </div>
+          <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3.5 hover:bg-white/15 transition shadow-lg">
+            <i class="fa-solid fa-microphone-lines text-rose-400 text-xl mb-1.5 block"></i>
+            <div class="text-xs font-bold font-heading">Dikte Suara (id-ID)</div>
+            <div class="text-[11px] text-slate-300">Navigasi Sel Lisan</div>
+          </div>
+          <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3.5 hover:bg-white/15 transition shadow-lg">
+            <i class="fa-brands fa-google-drive text-amber-400 text-xl mb-1.5 block"></i>
+            <div class="text-xs font-bold font-heading">Arsip Otomatis</div>
+            <div class="text-[11px] text-slate-300">Folder Tahun Drive</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Konten Bawah: Footer -->
+      <div class="relative z-20 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300/80 border-t border-white/15 pt-4">
+        <span><i class="fa-solid fa-shield-halved text-emerald-400 mr-1.5"></i> Terhubung Aman Localhost 3000 & Google Workspace</span>
+        <span>Kabupaten Banyuasin, Sumatera Selatan</span>
+      </div>
+    </div>
+
+    <!-- SISI KANAN (40%): FORM LOGIN -->
+    <div class="lg:w-5/12 flex items-center justify-center p-6 sm:p-10 lg:p-12 bg-white dark:bg-slate-900 transition">
+      <div class="w-full max-w-md space-y-6">
+        
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-600/10 dark:bg-indigo-500/15 border border-indigo-500/30 p-2 flex items-center justify-center overflow-hidden">
+              <img id="loginLogoSmall" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Logo" class="w-full h-full object-contain">
+            </div>
+            <span id="timeGreetingBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+              ☀️ Selamat Datang
+            </span>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900 dark:text-white pt-2 font-heading">Masuk ke Ruang Kerja</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Masukkan akun Admin atau Staf Anda untuk mengakses lembar kerja spreadsheet.
+          </p>
+        </div>
+
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Username Pegawai / Admin</label>
+            <div class="relative">
+              <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-slate-400"></i>
+              <input type="text" id="loginUsername" required placeholder="admin atau staf1"
+                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800/90 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 text-sm transition shadow-sm">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Password</label>
+            <div class="relative">
+              <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400"></i>
+              <input type="password" id="loginPassword" required placeholder="••••••••"
+                class="w-full pl-10 pr-11 py-3 bg-slate-50 dark:bg-slate-800/90 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 text-sm transition shadow-sm">
+              <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-indigo-500 transition">
+                <i id="eyePasswordIcon" class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="loginError" class="hidden text-xs bg-rose-500/10 border border-rose-500/30 text-rose-500 p-3 rounded-xl font-medium"></div>
+
+          <button type="submit" id="btnLogin"
+            class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl btn-glow-primary transition flex items-center justify-center gap-2 text-sm font-heading">
+            <span>Masuk ke Ruang Kerja</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <!-- Akun Demo & Petunjuk -->
+        <div class="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 text-xs text-slate-500 dark:text-slate-400 space-y-1.5">
+          <div class="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-key text-indigo-500"></i>
+            <span>Akun Bawaan Siap Pakai:</span>
+          </div>
+          <p>• <b>Admin Command Center:</b> <code>admin</code> / <code>admin123</code></p>
+          <p>• <b>Staf 1 (Budi Santoso):</b> <code>staf1</code> / <code>12345</code></p>
+          <p>• <b>Staf 2 (Siti Rahma):</b> <code>staf2</code> / <code>12345</code></p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       2. DASHBOARD ADMIN (CYBER COMMAND CENTER)
+       ===================================================================== -->
+  <section id="adminSection" class="hidden flex-1 flex flex-col">
+    <!-- Header Admin -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex flex-wrap items-center justify-between gap-4 shadow-sm sticky top-[49px] z-30">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600/15 border border-indigo-500/30 p-1.5 flex items-center justify-center overflow-hidden">
+          <img id="adminHeaderLogo" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-full h-full object-contain">
+        </div>
+        <div>
+          <h2 id="adminHeaderTitle" class="font-bold text-slate-900 dark:text-white text-base leading-tight font-heading">DASHBOARD MONITORING ADMIN</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Pantau Live Keystroke Telemetry, Dikte Suara Staf & Pengarsipan Otomatis</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="button" onclick="openBroadcastModal()" class="px-3.5 py-2 bg-indigo-600/15 hover:bg-indigo-600 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-bullhorn"></i>
+          <span>Siarkan Pengumuman</span>
+        </button>
+
+        <button type="button" onclick="openBrandingModal()" class="px-3.5 py-2 bg-amber-500/15 hover:bg-amber-500 border border-amber-500/40 text-amber-700 dark:text-amber-300 hover:text-slate-950 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-palette"></i>
+          <span>Branding Kantor</span>
+        </button>
+
+        <button type="button" onclick="loadAdminDashboard()" class="px-3.5 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-rotate"></i>
+          <span>Refresh</span>
+        </button>
+
+        <button type="button" onclick="openAddStaffModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 btn-glow-success transition">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>Tambah Staf Baru</span>
+        </button>
+
+        <button type="button" onclick="handleLogout()" class="px-3.5 py-2 bg-rose-600/15 hover:bg-rose-600 border border-rose-500/30 text-rose-600 dark:text-rose-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-power-off"></i>
+          <span>Keluar</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
+      
+      <!-- 5 KARTU KPI TELEMETRI UTAMA -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="glass-card rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Total Staf</p>
+            <h3 id="statTotalStaf" class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1 font-heading">0</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">1 Staf = 1 Sheet</p>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-indigo-500/15 text-indigo-500 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-users"></i>
+          </div>
+        </div>
+
+        <div class="glass-card border border-emerald-500/40 rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-emerald-600 dark:text-emerald-400 uppercase font-semibold flex items-center gap-1.5">
+              <span class="lamp-online"></span> Staf Online
+            </p>
+            <h3 id="statOnline" class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 font-heading">0</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">Live Real-Time</p>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-signal"></i>
+          </div>
+        </div>
+
+        <div class="glass-card border border-rose-500/40 rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-rose-600 dark:text-rose-400 uppercase font-semibold flex items-center gap-1.5">
+              <span class="lamp-offline"></span> Staf Offline
+            </p>
+            <h3 id="statOffline" class="text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-1 font-heading">0</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">Tidak Aktif</p>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-rose-500/15 text-rose-500 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-power-off"></i>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Total Ketikan</p>
+            <h3 id="statTotalKetikan" class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1 font-heading">0</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">Baris Data Aktif</p>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-indigo-500/15 text-indigo-500 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-table-list"></i>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Total Arsip</p>
+            <h3 id="statTotalArsip" class="text-2xl font-extrabold text-amber-500 mt-1 font-heading">0</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">Folder Tahun Drive</p>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-box-archive"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE ACTIVITY FEED TICKER (CYBER MONITOR) -->
+      <div class="glass-panel rounded-2xl p-4 border border-indigo-500/30 space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-heading">Live Telemetry & Activity Feed</h4>
+          </div>
+          <span class="text-[11px] text-slate-400">Keystrokes, Dikte Suara & Simpan Sel</span>
+        </div>
+        <div id="liveActivityFeed" class="space-y-1 max-h-24 overflow-y-auto">
+          <div class="text-xs text-slate-400 italic py-1">Menunggu aktivitas staf selanjutnya...</div>
+        </div>
+      </div>
+
+      <!-- KARTU DAFTAR MONITORING STAF -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2 font-heading">
+            <i class="fa-solid fa-users-viewfinder text-indigo-500"></i>
+            <span>Daftar Monitoring Staf & Lembar Kerja</span>
+          </h3>
+          <span class="text-xs text-slate-400">Klik "Intip Live" untuk melihat sel ketikan staf secara real-time</span>
+        </div>
+
+        <div id="staffCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+
+      <!-- GRAFIK PRODUKTIVITAS & ARSIP TAHUNAN -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 glass-card rounded-2xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-sm text-slate-900 dark:text-white font-heading">Produktivitas Ketikan Staf (Baris Aktif)</h4>
+            <span class="text-xs text-slate-400">Diperbarui Real-Time</span>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="chartStaffProductivity"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-sm text-slate-900 dark:text-white font-heading">Distribusi Arsip Per Tahun</h4>
+            <span class="text-xs text-slate-400">Total File</span>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="chartArchiveByYear"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL PENGARSIPAN TAHUNAN GOOGLE DRIVE -->
+      <div class="glass-card rounded-2xl p-6 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
+          <div>
+            <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2 font-heading">
+              <i class="fa-solid fa-folder-tree text-amber-500"></i>
+              <span>Pengarsipan Otomatis Berdasarkan Folder Tahun</span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              Otomatis membuat folder tahun di Drive, memindahkan file, mengunci mode View-Only, dan membuat lembar kerja baru yang bersih.
+            </p>
+          </div>
+
+          <div id="driveYearFoldersList" class="flex flex-wrap items-center gap-2"></div>
+        </div>
+
+        <!-- Form Eksekusi Arsip -->
+        <div class="bg-slate-50 dark:bg-slate-900/80 p-4 rounded-xl border border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Target Staf</label>
+            <select id="archiveStaffSelect" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Tahun Folder Arsip</label>
+            <input type="text" id="archiveYearInput" value="2026" placeholder="Contoh: 2026"
+              class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono font-bold">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Catatan Periode (Opsional)</label>
+            <input type="text" id="archiveNoteInput" placeholder="Contoh: Triwulan I"
+              class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs">
+          </div>
+          <div>
+            <button type="button" onclick="handleArchiveExecution()" id="btnExecuteArchive"
+              class="w-full py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow">
+              <i class="fa-solid fa-box-archive"></i>
+              <span>Arsipkan ke Folder Tahun</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabel Riwayat Arsip -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-heading">Riwayat Berkas Diarsipkan</h4>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400">Filter Tahun:</span>
+              <select id="filterArchiveYear" onchange="renderArchiveTable()" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs"></select>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider">
+                  <th class="p-3 w-28">Tahun Folder</th>
+                  <th class="p-3 w-40">Nama Staf</th>
+                  <th class="p-3">Nama Berkas Arsip</th>
+                  <th class="p-3 w-28 text-center">Total Baris</th>
+                  <th class="p-3 w-36">Waktu Arsip</th>
+                  <th class="p-3 w-24 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="archiveTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </section>
+
+  <!-- =====================================================================
+       3. PORTAL STAF: WORKSPACE DIKTE SUARA & SPREADSHEET
+       ===================================================================== -->
+  <section id="staffSection" class="hidden flex-1 flex flex-col">
+    <!-- Header Staf -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex flex-wrap items-center justify-between gap-4 shadow-sm sticky top-[49px] z-30">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-600/15 border border-emerald-500/30 p-1.5 flex items-center justify-center overflow-hidden">
+          <img id="staffHeaderLogo" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-full h-full object-contain">
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 id="staffHeaderName" class="font-bold text-slate-900 dark:text-white text-base font-heading">Nama Staf</h2>
+            <span class="flex items-center gap-1.5 text-[11px] bg-emerald-500/15 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 px-2.5 py-0.5 rounded-full font-semibold">
+              <span class="lamp-online"></span> ONLINE
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Asisten Dikte Suara Bahasa Indonesia (id-ID) & Lembar Ketikan Terpadu</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <!-- Telemetry Tracker (WPM + Focus Time) -->
+        <div class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs flex items-center gap-2">
+          <i class="fa-solid fa-stopwatch text-indigo-500"></i>
+          <span>Fokus: <b id="pomodoroTimerDisplay" class="font-mono">00:00</b></span>
+        </div>
+
+        <div class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs flex items-center gap-2">
+          <i class="fa-solid fa-keyboard text-emerald-500"></i>
+          <span id="staffWpmCounter" class="font-mono font-bold text-emerald-600 dark:text-emerald-400">0 WPM</span>
+        </div>
+
+        <div class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs">
+          Baris Terisi: <b id="staffRowCounter" class="text-indigo-600 dark:text-indigo-400 font-bold text-sm">0</b>
+        </div>
+
+        <button type="button" onclick="openAddRowModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 btn-glow-success transition">
+          <i class="fa-solid fa-plus"></i>
+          <span>Tambah Baris</span>
+        </button>
+
+        <a id="staffOpenSheetBtn" href="#" target="_blank" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 btn-glow-primary transition">
+          <i class="fa-solid fa-up-right-from-square"></i>
+          <span class="hidden sm:inline">Buka Sheet Penuh</span>
+        </a>
+
+        <button type="button" onclick="handleLogout()" class="px-3.5 py-2 bg-rose-600/15 hover:bg-rose-600 border border-rose-500/30 text-rose-600 dark:text-rose-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-power-off"></i>
+          <span>Keluar</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="flex-1 p-6 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- PANEL KIRI (4 KOLOM): ASISTEN DIKTE SUARA PINTAR -->
+      <div class="lg:col-span-4 space-y-5">
+        <div class="glass-card border-2 border-indigo-500/40 rounded-2xl p-5 shadow-xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-600 dark:text-indigo-300">
+                Web Speech API • id-ID
+              </span>
+              <h3 class="text-base font-bold text-slate-900 dark:text-white mt-1 font-heading">Asisten Dikte Suara</h3>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-400 block">Sel Aktif:</span>
+              <span id="activeCellBadge" class="px-3 py-1 rounded-xl bg-emerald-500 text-slate-950 font-mono font-bold text-base inline-block shadow">B2</span>
+            </div>
+          </div>
+
+          <!-- MIKROFON INTERAKTIF -->
+          <div class="flex flex-col items-center justify-center py-5 bg-slate-50 dark:bg-slate-900/90 rounded-2xl border border-slate-200 dark:border-slate-800 relative overflow-hidden">
+            <div class="relative flex items-center justify-center">
+              <div id="micReactiveRing" class="mic-reactive-ring absolute w-20 h-20 rounded-full bg-rose-500/0 pointer-events-none"></div>
+              
+              <button type="button" onclick="toggleVoiceDictation()" id="btnMicDictation"
+                class="relative z-10 w-20 h-20 rounded-full bg-slate-200 dark:bg-slate-800 hover:bg-rose-600 text-slate-700 dark:text-slate-200 hover:text-white border-2 border-slate-300 dark:border-slate-600 flex flex-col items-center justify-center transition shadow-xl">
+                <i id="micMainIcon" class="fa-solid fa-microphone text-2xl"></i>
+                <span id="micBtnLabel" class="text-[10px] font-bold mt-1 uppercase">Mulai Dikte</span>
+              </button>
+            </div>
+
+            <!-- Waveform Baris Animasi -->
+            <div id="voiceWaveContainer" class="hidden flex items-end justify-center gap-1.5 h-8 mt-4">
+              <div class="voice-bar-anim" style="animation-delay: 0.1s"></div>
+              <div class="voice-bar-anim" style="animation-delay: 0.25s"></div>
+              <div class="voice-bar-anim" style="animation-delay: 0.4s"></div>
+              <div class="voice-bar-anim" style="animation-delay: 0.15s"></div>
+              <div class="voice-bar-anim" style="animation-delay: 0.3s"></div>
+              <span class="text-xs font-bold text-rose-500 ml-2 animate-pulse">MENDENGARKAN SUARA...</span>
+            </div>
+
+            <p id="voiceStatusSub" class="text-xs text-slate-500 dark:text-slate-400 mt-3 text-center px-4">
+              Klik mikrofon (atau tekan <b>Ctrl + Spasi</b>), lalu ucapkan teks atau perintah navigasi sel.
+            </p>
+          </div>
+
+          <!-- Transkrip Pengenalan Suara -->
+          <div class="bg-slate-100 dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
+            <div class="flex items-center justify-between text-[11px] text-slate-400">
+              <span>Transkrip Suara Terakhir:</span>
+              <span class="text-emerald-500 font-semibold">Siap</span>
+            </div>
+            <p id="liveVoiceTranscript" class="text-sm font-medium text-slate-800 dark:text-white min-h-[26px] italic">
+              "..."
+            </p>
+          </div>
+
+          <!-- Perintah Suara Pintar Bahasa Indonesia -->
+          <div class="bg-indigo-500/5 border border-indigo-500/20 rounded-xl p-3.5 space-y-2 text-xs">
+            <h4 class="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5 font-heading">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>Perintah Suara Cerdas (id-ID):</span>
+            </h4>
+            <ul class="space-y-1.5 text-slate-600 dark:text-slate-300 text-[11px]">
+              <li>• <b>"Pindah ke B4"</b> (atau <i>C2, D10, E5</i>) → Meloncat langsung ke sel.</li>
+              <li>• <b>"Baris baru"</b> / <b>"Turun"</b> → Berpindah ke baris bawahnya.</li>
+              <li>• <b>"Samping"</b> / <b>"Kanan"</b> → Berpindah ke kolom sebelah kanan.</li>
+              <li>• <b>"Hapus"</b> / <b>"Bersihkan"</b> → Mengosongkan isi sel aktif.</li>
+              <li>• <b>"Baca ulang"</b> → Membacakan isi sel dengan suara.</li>
+              <li>• <b>Ucapkan kalimat bebas</b> → Mengisi sel aktif & otomatis tersimpan!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL KANAN (8 KOLOM): TABS SMART GRID & FORMULA -->
+      <div class="lg:col-span-8 glass-card rounded-2xl flex flex-col overflow-hidden min-h-[620px]">
+        
+        <!-- Tab Bar Header -->
+        <div class="px-4 py-3 bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="switchStaffViewTab('grid')" id="tabBtnGrid"
+              class="px-3.5 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-table-cells"></i>
+              <span>Smart Grid Dikte (A1 - G25)</span>
+            </button>
+            <button type="button" onclick="switchStaffViewTab('table')" id="tabBtnTable"
+              class="px-3.5 py-1.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-list-check"></i>
+              <span>Tabel Riwayat Ketikan</span>
+            </button>
+            <button type="button" onclick="switchStaffViewTab('iframe')" id="tabBtnIframe"
+              class="px-3.5 py-1.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-regular fa-file-excel"></i>
+              <span>Tampilan Google Sheet Asli</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <a href="#" id="btnDownloadExcelStaff" onclick="this.href='/api/export/excel/' + currentUser.id" class="px-3 py-1.5 bg-emerald-600/15 hover:bg-emerald-600 text-emerald-600 dark:text-emerald-300 hover:text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-regular fa-file-excel"></i> Unduh .XLSX
+            </a>
+          </div>
+        </div>
+
+        <!-- TAB 1: SMART GRID INTERAKTIF -->
+        <div id="staffSmartGridContainer" class="flex-1 overflow-auto p-4 space-y-2">
+          <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span>Gunakan tombol panah keyboard atau suara <b>"Pindah ke C3"</b>. Dukungan formula <code>=SUM(A1:A5)</code>.</span>
+            <span class="text-emerald-500 font-semibold flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Real-time Sync Aktif
+            </span>
+          </div>
+
+          <div class="overflow-x-auto border border-slate-300 dark:border-slate-700 rounded-xl shadow-inner">
+            <table class="w-full border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-mono font-bold">
+                  <th class="w-12 p-2 border border-slate-300 dark:border-slate-700 text-center">#</th>
+                  <th class="p-2 border border-slate-300 dark:border-slate-700 text-center w-28">A (NO)</th>
+                  <th class="p-2 border border-slate-300 dark:border-slate-700 text-center w-40">B (TANGGAL)</th>
+                  <th class="p-2 border border-slate-300 dark:border-slate-700 text-center w-36">C (KATEGORI)</th>
+                  <th class="p-2 border border-slate-300 dark:border-slate-700 text-center min-w-[200px]">D (URAIAN KETIKAN)</th>
+                  <th class="p-2 border border-slate-300 dark:border-slate-700 text-center w-36">E (KETERANGAN)</th>
+                  <th class="p-2 border border-slate-300 dark:border-slate-700 text-center w-28">F (STATUS)</th>
+                  <th class="p-2 border border-slate-300 dark:border-slate-700 text-center w-20">G</th>
+                </tr>
+              </thead>
+              <tbody id="smartGridBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 2: TABEL RIWAYAT KETIKAN BERSIH -->
+        <div id="staffTableContainer" class="hidden flex-1 overflow-auto p-4">
+          <div class="overflow-x-auto border border-slate-300 dark:border-slate-700 rounded-xl">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider">
+                  <th class="p-3 w-12 text-center">NO</th>
+                  <th class="p-3 w-40">TANGGAL</th>
+                  <th class="p-3 w-36">KATEGORI</th>
+                  <th class="p-3">URAIAN DATA KETIKAN</th>
+                  <th class="p-3 w-44">KETERANGAN</th>
+                  <th class="p-3 w-28 text-center">STATUS</th>
+                </tr>
+              </thead>
+              <tbody id="staffDataRowsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 3: IFRAME SPREADSHEET ASLI -->
+        <div id="staffIframeContainer" class="hidden flex-1 flex flex-col">
+          <iframe id="staffSheetIframe" src="about:blank" class="w-full flex-1 border-0 bg-white"></iframe>
+        </div>
+
+      </div>
+    </main>
+  </section>
+
+  <!-- =====================================================================
+       MODAL 1: LIVE TELEMETRY INTIP MIRROR (ADMIN)
+       ===================================================================== -->
+  <div id="modalLiveIntip" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-2xl max-w-4xl w-full p-6 space-y-4 shadow-2xl border border-indigo-500/40">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
+          <h3 id="intipModalTitle" class="font-bold text-slate-900 dark:text-white text-base font-heading">
+            Live Telemetry Mirror: Staf
+          </h3>
+        </div>
+        <button type="button" onclick="closeLiveIntipModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <p class="text-xs text-slate-400">
+        Layar mirror real-time. Setiap ketukan tombol dan kalimat dikte suara staf akan langsung ter-render di sini tanpa refresh.
+      </p>
+
+      <div class="overflow-x-auto border border-slate-300 dark:border-slate-700 rounded-xl max-h-96">
+        <table class="w-full border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-mono font-bold">
+              <th class="w-10 p-2 text-center border border-slate-300 dark:border-slate-700">#</th>
+              <th class="p-2 border border-slate-300 dark:border-slate-700 text-center w-20">A (NO)</th>
+              <th class="p-2 border border-slate-300 dark:border-slate-700 text-center w-36">B (TANGGAL)</th>
+              <th class="p-2 border border-slate-300 dark:border-slate-700 text-center w-32">C (KATEGORI)</th>
+              <th class="p-2 border border-slate-300 dark:border-slate-700 text-center">D (URAIAN KETIKAN)</th>
+              <th class="p-2 border border-slate-300 dark:border-slate-700 text-center w-28">E (STATUS)</th>
+            </tr>
+          </thead>
+          <tbody id="intipGridBody"></tbody>
+        </table>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button type="button" onclick="closeLiveIntipModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-xs font-semibold rounded-xl">
+          Tutup Mirror
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 2: TAMBAH BARIS CEPAT (STAF)
+       ===================================================================== -->
+  <div id="modalAddRow" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+        <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2 font-heading">
+          <i class="fa-solid fa-plus-circle text-emerald-500"></i>
+          <span>Tambah Baris Ketikan Baru</span>
+        </h3>
+        <button type="button" onclick="closeAddRowModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form onsubmit="handleSaveNewRow(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Kategori / Kode Berkas</label>
+          <input type="text" id="rowKategori" required placeholder="Contoh: KTP-EL / SURAT MASUK / AKTA" value="SURAT MASUK"
+            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Uraian Data Ketikan</label>
+          <textarea id="rowUraian" required rows="3" placeholder="Tuliskan uraian pekerjaan atau data yang diketik..."
+            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Keterangan Tambahan</label>
+          <input type="text" id="rowKeterangan" placeholder="Contoh: Selesai Paraf Kadis"
+            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Status Pengerjaan</label>
+          <select id="rowStatus" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm">
+            <option value="SELESAI">SELESAI</option>
+            <option value="PROSES">DALAM PROSES</option>
+            <option value="PENDING">PENDING</option>
+          </select>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeAddRowModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-xs font-semibold rounded-xl">Batal</button>
+          <button type="submit" id="btnSaveRow" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl btn-glow-success">
+            Simpan ke Lembar Kerja
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 3: TAMBAH STAF BARU (ADMIN)
+       ===================================================================== -->
+  <div id="modalAddStaff" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+        <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2 font-heading">
+          <i class="fa-solid fa-user-plus text-emerald-500"></i>
+          <span>Tambah Staf & Lembar Kerja Baru</span>
+        </h3>
+        <button type="button" onclick="closeAddStaffModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form onsubmit="handleCreateStaff(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Nama Lengkap Pegawai / Staf</label>
+          <input type="text" id="newStaffNama" required placeholder="Contoh: Rian Pratama, S.Kom"
+            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Username Login</label>
+          <input type="text" id="newStaffUser" required placeholder="Contoh: rian"
+            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Password</label>
+          <input type="password" id="newStaffPass" required placeholder="••••••••" value="12345"
+            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeAddStaffModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-xs font-semibold rounded-xl">Batal</button>
+          <button type="submit" id="btnSaveStaff" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl btn-glow-success">
+            Simpan & Buat Sheet
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 4: BRANDING KANTOR (ADMIN)
+       ===================================================================== -->
+  <div id="modalBranding" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+        <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2 font-heading">
+          <i class="fa-solid fa-palette text-amber-500"></i>
+          <span>Pengaturan Logo & Background Kantor</span>
+        </h3>
+        <button type="button" onclick="closeBrandingModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form onsubmit="handleSaveBranding(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Nama Kantor / Instansi / Dinas</label>
+          <input type="text" id="brandOfficeName" required placeholder="PORTAL KERJA & MONITORING DIGITAL"
+            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Slogan Kantor</label>
+          <textarea id="brandOfficeTagline" rows="2" placeholder="Sistem Manajemen Dokumen..."
+            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">URL Logo Kantor (Mendukung Link Drive)</label>
+          <input type="text" id="brandLogoUrl" placeholder="https://..."
+            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">URL Foto Background Hero (Mendukung Link Drive)</label>
+          <input type="text" id="brandBgUrl" placeholder="https://..."
+            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeBrandingModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-xs font-semibold rounded-xl">Batal</button>
+          <button type="submit" id="btnSaveBranding" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl btn-glow-primary">
+            Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 5: BROADCAST MEMO ADMIN
+       ===================================================================== -->
+  <div id="modalBroadcast" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+        <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2 font-heading">
+          <i class="fa-solid fa-bullhorn text-indigo-500"></i>
+          <span>Siarkan Pengumuman ke Seluruh Staf</span>
+        </h3>
+        <button type="button" onclick="closeBroadcastModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form onsubmit="handleSendBroadcast(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Pesan Pengumuman / Memo Penting</label>
+          <textarea id="broadcastInputMessage" required rows="3" placeholder="Tulis instruksi atau pengumuman kedinasan..."
+            class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">Tingkat Prioritas</label>
+          <select id="broadcastInputLevel" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm">
+            <option value="INFO">Informasi Biasa</option>
+            <option value="URGENT">PENTING / SEGERA (Urgent)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeBroadcastModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-xs font-semibold rounded-xl">Batal</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl btn-glow-primary">
+            Siarkan Sekarang
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Client Application Script -->
+  <script src="/js/app.js"></script>
+</body>
+</html>
