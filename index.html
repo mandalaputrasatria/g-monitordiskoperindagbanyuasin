@@ -4,6 +4,64 @@
   <meta charset="UTF-8">
   <meta name="referrer" content="no-referrer">
   <title>Smart Workspace: Monitoring Staf, Dikte Suara & Arsip Drive</title>
+
+  <!-- Universal Google Apps Script Bridge (Direct fallback for GitHub Pages & Standalone) -->
+  <script>
+    (function() {
+      if (typeof window.google === 'undefined') {
+        window.google = {};
+      }
+      if (!window.google.script) {
+        window.google.script = {};
+      }
+      if (!window.google.script.run) {
+        var GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbzXVA-mCJFlZecMADLziVjjqk4WnMwIn0MpOCXSco_dA4QrTMfSiRRCsqLD-Oi3ElW2GQ/exec';
+        function createGasRunner(successCb, failureCb) {
+          return new Proxy({}, {
+            get: function(target, functionName) {
+              if (functionName === 'withSuccessHandler') {
+                return function(handler) { return createGasRunner(handler, failureCb); };
+              }
+              if (functionName === 'withFailureHandler') {
+                return function(handler) { return createGasRunner(successCb, handler); };
+              }
+              return function() {
+                var args = Array.prototype.slice.call(arguments);
+                var isLocalExpress = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (window.location.port === '3000');
+                var endpoint = isLocalExpress ? '/api/gas-call' : GAS_WEBAPP_URL;
+                var reqHeaders = isLocalExpress ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'text/plain;charset=utf-8' };
+
+                fetch(endpoint, {
+                  method: 'POST',
+                  headers: reqHeaders,
+                  body: JSON.stringify({ functionName: functionName, args: args }),
+                  redirect: 'follow'
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                  if (data && data.error === undefined && (data.status === undefined || data.status === 'success')) {
+                    if (typeof successCb === 'function') {
+                      try { successCb(data.result !== undefined ? data.result : data); } catch (e) { console.error('Callback error:', e); }
+                    }
+                  } else {
+                    var msg = (data && data.message) ? data.message : 'Terjadi kendala pada server backend';
+                    if (typeof failureCb === 'function') { failureCb(new Error(msg)); } else { console.error('GAS Error:', msg); }
+                  }
+                })
+                .catch(function(err) {
+                  console.error('GAS Network Error:', err);
+                  if (typeof failureCb === 'function') { failureCb(err); }
+                });
+              };
+            }
+          });
+        }
+        window.google.script.run = createGasRunner();
+        console.log('✅ Universal Google Apps Script Bridge aktif (Mode GitHub Pages / Direct API).');
+      }
+    })();
+  </script>
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>

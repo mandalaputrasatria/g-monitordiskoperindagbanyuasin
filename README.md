@@ -4,11 +4,16 @@
 ### Smart Workspace: Monitoring Staf Real-Time, Asisten Dikte Suara Pintar (id-ID), Luckysheet Document Grid & Pengarsipan Google Drive Terpadu
 
 [![Google Apps Script](https://img.shields.io/badge/Google%20Apps%20Script-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://developers.google.com/apps-script)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen?style=for-the-badge&logo=github)](https://mandalaputrasatria.github.io/g-monitordiskoperindagbanyuasin/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Web Audio API](https://img.shields.io/badge/Web%20Audio%20API-FF6F00?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
 [![Luckysheet](https://img.shields.io/badge/Luckysheet-Document_Grid-10B981?style=for-the-badge&logo=microsoftexcel&logoColor=white)](https://github.com/mengshukeji/Luckysheet)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+
+<p align="center">
+  🌐 <b>Live Web URL (GitHub Pages)</b>: <a href="https://mandalaputrasatria.github.io/g-monitordiskoperindagbanyuasin/">https://mandalaputrasatria.github.io/g-monitordiskoperindagbanyuasin/</a>
+</p>
 
 <p align="center">
   <b>Sistem Administrasi Kerja & Monitoring Produktivitas Pegawai Dinas Koperasi, Usaha Kecil dan Menengah, Perindustrian dan Perdagangan Kabupaten Banyuasin.</b>
@@ -142,7 +147,7 @@ Proyek ini telah dikonfigurasi dengan Google Clasp sehingga sinkronisasi kode ke
 ├── appsscript.json      # Manifest konfigurasi runtime Google Apps Script
 ├── Code.gs              # Backend server Google Apps Script (Database & Drive Handler)
 ├── config.json          # Konfigurasi proxy lokal server & endpoint Web App
-├── Index.html           # Frontend SPA (UI, Luckysheet, Visualizer, Cosmic Toast)
+├── index.html           # Frontend SPA (UI, Luckysheet, Visualizer, Cosmic Toast)
 ├── package.json         # Konfigurasi paket Node.js
 ├── README.md            # Dokumentasi utama proyek
 └── server.js            # Node.js Express local proxy server

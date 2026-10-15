@@ -8,7 +8,9 @@ const server = http.createServer(app);
 
 const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, 'data', 'database.json');
-const ORIGINAL_INDEX_PATH = path.join(__dirname, 'Index.html');
+const ORIGINAL_INDEX_PATH = fs.existsSync(path.join(__dirname, 'index.html'))
+  ? path.join(__dirname, 'index.html')
+  : path.join(__dirname, 'Index.html');
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 
 app.use(express.json({ limit: '50mb' }));
