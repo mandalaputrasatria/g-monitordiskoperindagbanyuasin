@@ -76,11 +76,17 @@
 - **Antrean Dikte Offline (*Offline Queue*)**: Ketika koneksi WiFi atau internet kantor sedang terputus, staf tetap dapat mendikte dan mengetik data kerja. Seluruh perubahan disimpan secara aman di memori lokal perangkat (`localStorage`).
 - **Sinkronisasi Otomatis (*Auto-Sync*)**: Begitu internet kembali online, sistem secara otomatis mengunggah seluruh draf sel ke Google Sheets dan memunculkan konfirmasi *Cosmic Pulse Toast*.
 
-### 9. 📄 Generator Laporan Cetak & Ekspor PDF Resmi (KOP Pemkab Banyuasin + QR-Code TTE)
-- **KOP Surat Resmi Standar Naskah Dinas**: Dilengkapi lambang resmi Kabupaten Banyuasin, tipografi naskah dinas baku, dan garis ganda tebal-tipis (*double border*).
-- **Simulasi Kertas Presisi (A4 & F4 / Folio)**: Pratinjau interaktif real-time dengan pilihan orientasi Potret maupun Lanskap.
-- **Validasi Elektronik QR-Code (TTE)**: Menghasilkan kode QR tajam di sudut bawah dokumen yang merekam tautan berkas arsip resmi Google Drive dan hash audit integritas naskah.
-- **Ekspor Multi-Format**: Cetak langsung (*Ctrl+P / Direct Print*) dengan layout bersih otomatis tanpa elemen UI, serta unduh file PDF beresolusi tinggi (300 DPI) via `html2pdf.js`.
+### 9. 📊 e-Digital Kinerja Pegawai G-MONITOR & Generator Laporan Resmi
+- **Modul Khusus Admin Eksekutif**: Terintegrasi eksklusif pada Dashboard Administrator untuk memantau, merekapitulasi, dan mendokumentasikan kinerja harian seluruh pegawai Diskoperindag.
+- **Pemilihan Periode & Target Pegawai Fleksibel**: Menyaring rekaman kerja berdasarkan Hari Ini, 7 Hari Terakhir, Bulan Berjalan, Semua Waktu, maupun rentang tanggal kustom (date picker); serta pilihan agregat dinas ("Semua Pegawai") atau pemantauan individual per staf.
+- **Rekapitulasi Metode Input & Rasio Adopsi Suara**: Menghitung secara presisi perbandingan aktivitas pengetikan manual (keyboard) vs dikte suara vokal (STT), dilengkapi *visual progress bar* dua warna dan **narasi evaluasi otomatis** berdasarkan indeks efisiensi kerja.
+- **Tabel Komparatif Capaian & Sampel Aktivitas**: Menyajikan matriks produktivitas staf (Total Sel, Manual, Dikte, Rasio STT %, status performa dinamis) serta sampel cuplikan entri pekerjaan terbaru dengan lencana metode input.
+- **Dua Format Berkas Resmi**:
+  1. **Cetak PDF Resmi Standar Naskah Dinas**: KOP Surat Resmi Pemkab Banyuasin dengan logo asli, garis ganda dinas, simulasi kertas presisi (A4 & F4 / Folio, Potret / Lanskap), tanda tangan ganda (Supervisor & Admin), watermark naskah asli, dan QR-Code validasi elektronik (TTE).
+  2. **Ekspor Lembar Kerja Excel (`.xlsx`)**: Ekspor multi-sheet instan via SheetJS (Sheet 1: Rekapitulasi Kinerja & Sheet 2: Log Detail Entri Aktivitas).
+- **Pengesahan Supervisor & Manajemen Arsip Digital**: Menentukan pejabat penilai internal (Kadis, Sekdin, Kabid Koperasi, Kabid Perdagangan, Kabid Perindustrian, atau kustom), status pengesahan (Disetujui, Menunggu, Dibatalkan), serta pencatatan audit hash ke riwayat arsip naskah dinas.
+- **Portal Verifikasi Keaslian Publik (`?verify=...`)**: Pemindaian kode QR di lembar fisik atau file PDF langsung mengarahkan ke sertifikat digital resmi Pemkab Banyuasin yang dapat diakses publik tanpa perlu login.
+- **Catatan Disclaimer Legal**: Penjelasan eksplisit bahwa angka aktivitas merekam operasional sistem digital G-MONITOR dan bukan pengganti otomatis penilaian SKP resmi ASN.
 
 ---
 

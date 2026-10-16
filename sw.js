@@ -3,7 +3,7 @@
  * Menyediakan kapabilitas Progressive Web App (PWA) & Offline-First caching
  */
 
-const CACHE_NAME = 'gmonitor-banyuasin-v1.0.0';
+const CACHE_NAME = 'gmonitor-banyuasin-v1.1.0';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
