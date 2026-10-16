@@ -192,6 +192,23 @@ function setupSystem() {
 }
 
 /**
+ * Helper: Hashing Password dengan Algoritma SHA-256 Standar
+ */
+function hashPassword(plainText) {
+  if (!plainText) return '';
+  const rawHash = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(plainText).trim(), Utilities.Charset.UTF_8);
+  let hexStr = '';
+  for (let i = 0; i < rawHash.length; i++) {
+    let byteVal = rawHash[i];
+    if (byteVal < 0) byteVal += 256;
+    let byteHex = byteVal.toString(16);
+    if (byteHex.length === 1) byteHex = '0' + byteHex;
+    hexStr += byteHex;
+  }
+  return hexStr;
+}
+
+/**
  * Helper: Ambil Konfigurasi Folder ID
  */
 function getConfigMap() {
@@ -309,13 +326,13 @@ function createStaffInternal(nama, nip, jabatan, unitKerja, noWa, fotoUrl, usern
     // Format Baru (15 Kolom)
     sheetUsers.appendRow([
       idStaf, nama, nip || '-', jabatan || 'Staf Pelaksana', unitKerja || 'Pelayanan Terpadu', noWa || '-',
-      fotoUrl || defaultFoto, username, password, 'STAF',
+      fotoUrl || defaultFoto, username, hashPassword(password), 'STAF',
       workSheet.id, workSheet.url, 0, 'OFFLINE', 0
     ]);
   } else {
     // Format Lama (10 Kolom)
     sheetUsers.appendRow([
-      idStaf, nama, username, password, 'STAF',
+      idStaf, nama, username, hashPassword(password), 'STAF',
       workSheet.id, workSheet.url, 0, 'OFFLINE', 0
     ]);
   }
@@ -335,11 +352,18 @@ function loginUser(username, password) {
   const data = sheet.getDataRange().getValues();
   const col = getUserColumnsMap(data[0]);
   const nowMs = new Date().getTime();
+  const trimmedUser = String(username).trim().toLowerCase();
+  const trimmedPass = String(password).trim();
+  const passHash = hashPassword(trimmedPass);
   
   for (let i = 1; i < data.length; i++) {
     const uName = String(data[i][col.username]).trim().toLowerCase();
     const uPass = String(data[i][col.password]).trim();
-    if (uName === String(username).trim().toLowerCase() && uPass === String(password).trim()) {
+    if (uName === trimmedUser && (uPass === trimmedPass || uPass === passHash)) {
+      // Auto-migration: Jika password tersimpan masih plaintext, perbarui ke hash SHA-256
+      if (uPass !== passHash) {
+        sheet.getRange(i + 1, col.password + 1).setValue(passHash);
+      }
       sheet.getRange(i + 1, col.lastActive + 1).setValue(nowMs);
       sheet.getRange(i + 1, col.status + 1).setValue('ONLINE');
       
@@ -912,7 +936,7 @@ function updateStaffData(idStaf, nama, nip, jabatan, unitKerja, noWa, fotoBase64
   }
   // Update Password jika diisi
   if (newPassword && String(newPassword).trim() !== '') {
-    sheetUsers.getRange(targetRow, col.password + 1).setValue(String(newPassword).trim());
+    sheetUsers.getRange(targetRow, col.password + 1).setValue(hashPassword(newPassword));
   }
   // Paksa Offline jika diminta
   if (forceOffline) {

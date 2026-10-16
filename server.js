@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
@@ -13,8 +14,23 @@ const ORIGINAL_INDEX_PATH = fs.existsSync(path.join(__dirname, 'index.html'))
   : path.join(__dirname, 'Index.html');
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 
+// Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Helper Hashing Password (SHA-256)
+function hashPassword(plainText) {
+  if (!plainText) return '';
+  return crypto.createHash('sha256').update(String(plainText).trim()).digest('hex');
+}
 
 // Membaca Konfigurasi Google Apps Script
 function readConfig() {
@@ -151,13 +167,22 @@ function saveOfficeBranding(officeName, officeTagline, rawLogoUrl, rawBgUrl, log
 
 function loginUser(username, password) {
   const db = readDB();
+  const trimmedUser = String(username).trim().toLowerCase();
+  const trimmedPass = String(password).trim();
+  const passHash = hashPassword(trimmedPass);
+
   const user = (db.users || []).find(
-    u => u.username.toLowerCase() === String(username).trim().toLowerCase() &&
-         String(u.password).trim() === String(password).trim()
+    u => u.username.toLowerCase() === trimmedUser &&
+         (String(u.password).trim() === trimmedPass || String(u.password).trim() === passHash)
   );
 
   if (!user) {
     return { success: false, message: 'Username atau Password salah!' };
+  }
+
+  // Auto-migration: Migrasikan password plaintext ke SHA-256 hash secara otomatis
+  if (user.password !== passHash) {
+    user.password = passHash;
   }
 
   user.lastActiveMs = Date.now();
@@ -334,7 +359,7 @@ function registerNewStaff(nama, nip, jabatan, unitKerja, noWa, fotoBase64, usern
     noWa: String(noWa || '-').trim(),
     fotoUrl: photoUrl,
     username: uName,
-    password: String(password).trim(),
+    password: hashPassword(password),
     role: 'STAF',
     sheetId: 'SHEET-' + idStaf,
     sheetUrl: `/sheet/${idStaf}`,
@@ -368,7 +393,7 @@ function updateStaffData(idStaf, nama, nip, jabatan, unitKerja, noWa, fotoBase64
     user.fotoUrl = convertDriveUrlToDirectImage(rawFotoUrl);
   }
   if (newPassword && String(newPassword).trim() !== '') {
-    user.password = String(newPassword).trim();
+    user.password = hashPassword(newPassword);
   }
   if (forceOffline) {
     user.statusManual = 'OFFLINE';

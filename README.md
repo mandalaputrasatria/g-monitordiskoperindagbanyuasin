@@ -88,6 +88,16 @@
 - **Portal Verifikasi Keaslian Publik (`?verify=...`)**: Pemindaian kode QR di lembar fisik atau file PDF langsung mengarahkan ke sertifikat digital resmi Pemkab Banyuasin yang dapat diakses publik tanpa perlu login.
 - **Catatan Disclaimer Legal**: Penjelasan eksplisit bahwa angka aktivitas merekam operasional sistem digital G-MONITOR dan bukan pengganti otomatis penilaian SKP resmi ASN.
 
+### 10. 🛡️ Keamanan Siber Terintegrasi (Cybersecurity & Data Hardening Suite)
+- **Pencegahan Cross-Site Scripting (XSS)**: Seluruh perenderan data pengguna ke dalam DOM telah disanitasi menggunakan fungsi `escapeHtml()` dan pemfilteran protokol URL berbahaya via `sanitizeUrl()`.
+- **Proteksi Serangan Reverse Tabnabbing**: 100% tautan eksternal (`target="_blank"`) dipersenjatai dengan atribut `rel="noopener noreferrer"`.
+- **Sistem Pertahanan Anti-Brute Force Lockout**: Form login diproteksi dari tebakan kata sandi berulang; akun dikunci otomatis selama 60 detik jika terjadi 5 kali kegagalan login berturut-turut, lengkap dengan indikator *live countdown timer*.
+- **Pemantau Inaktivitas Sesi Otomatis (Inactivity Auto-Logout 15 Menit)**: Sistem mendeteksi ketiadaan interaksi pengguna selama 15 menit dan otomatis mengunci sesi kerja dinas, dengan notifikasi peringatan dini 60 detik sebelumnya.
+- **Pembersihan Memori & State DOM Saat Logout**: Seluruh variabel sesi, daftar staf, dan elemen tabel dihapus bersih dari memori peramban saat pengguna menekan tombol keluar.
+- **Banner Peringatan Anti Self-XSS & Anti-Clickjacking**: Console browser memunculkan peringatan bahaya social engineering bagi pengguna awam, serta mekanisme *frame-busting* untuk menangkal eksploitasi pembajakan iframe.
+- **Hashing Password Standar SHA-256 & Auto-Migration**: Password pengguna disimpan dalam format hash kriptografi SHA-256 satu arah (baik pada backend Node.js maupun Google Apps Script). Sistem mendukung *auto-migration* transparan sehingga pengguna lama dapat langsung login tanpa perlu reset kata sandi.
+- **Header Keamanan Respons HTTP**: Dilengkapi `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `X-XSS-Protection: 1; mode=block`, dan `Referrer-Policy: strict-origin-when-cross-origin`.
+
 ---
 
 ## 🛠️ Arsitektur & Teknologi

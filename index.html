@@ -2,7 +2,9 @@
 <html lang="id" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Smart Workspace: Monitoring Staf, Dikte Suara & Arsip Drive</title>
 
   <!-- Universal Google Apps Script Bridge (Direct fallback for GitHub Pages & Standalone) -->
@@ -992,7 +994,7 @@
             </h3>
             <p class="text-xs text-slate-500 dark:text-slate-400">Folder tahun akan dibuat secara otomatis di Google Drive jika belum tersedia.</p>
           </div>
-          <a id="btnOpenArchiveRoot" href="#" target="_blank"
+          <a id="btnOpenArchiveRoot" href="#" target="_blank" rel="noopener noreferrer"
             class="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 text-amber-600 dark:text-amber-300 text-xs font-semibold rounded-xl flex items-center gap-2 transition">
             <i class="fa-solid fa-folder-tree"></i>
             <span>Buka Folder Induk Arsip Drive</span>
@@ -1148,7 +1150,7 @@
           <span class="hidden md:inline">Install App</span>
         </button>
 
-        <a id="staffOpenSheetBtn" href="#" target="_blank"
+        <a id="staffOpenSheetBtn" href="#" target="_blank" rel="noopener noreferrer"
           class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-sm"
           title="Buka Spreadsheet di Tab Baru">
           <i class="fa-solid fa-up-right-from-square"></i>
@@ -1631,7 +1633,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <a id="previewModalExternalLink" href="#" target="_blank"
+          <a id="previewModalExternalLink" href="#" target="_blank" rel="noopener noreferrer"
             class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition" title="Buka Spreadsheet di Tab Baru">
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
             <span>Buka Penuh Google Spreadsheet</span>
@@ -1664,7 +1666,7 @@
         </div>
         <div class="flex items-center gap-2 text-[11px]">
           <span class="text-slate-500 dark:text-slate-400">Terganggu cookie browser?</span>
-          <a id="previewModalDirectLink" href="#" target="_blank" class="font-bold underline hover:text-emerald-500 text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
+          <a id="previewModalDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="font-bold underline hover:text-emerald-500 text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
             Buka Tab Google Docs <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
           </a>
         </div>
@@ -2234,6 +2236,219 @@
        JAVASCRIPT ENGINE (BEBAS ERROR SANDBOX + BRANDING + MIKROFON MULUS)
        ===================================================================== -->
   <script>
+    // =====================================================================
+    // 🛡️ MODUL KEAMANAN SIBER & PERLINDUNGAN AKSES (CYBERSECURITY SUITE)
+    // =====================================================================
+    // 1. Peringatan Konsol Anti Self-XSS (Social Engineering Guard)
+    (function() {
+      try {
+        console.log("%c🏛️ DISKOPERINDAG KABUPATEN BANYUASIN - SISTEM KEAMANAN SIBER", "color: #4f46e5; font-size: 16px; font-weight: bold; padding: 4px;");
+        console.log("%c⛔ PERINGATAN KEAMANAN (ANTI SELF-XSS):", "color: #ef4444; font-size: 14px; font-weight: bold;");
+        console.log("%cIni adalah area konsol pengembang peramban. DILARANG KERAS menempelkan (paste) skrip, kode JavaScript, atau perintah apa pun di sini atas instruksi siapa pun. Menempelkan skrip asing dapat membahayakan data kantor dan memberi akses ilegal ke akun Anda.", "color: #334155; font-size: 11px;");
+      } catch (e) {}
+    })();
+
+    // 2. Proteksi Anti-Clickjacking / Frame-Busting
+    (function() {
+      if (window.top !== window.self) {
+        try {
+          var topHost = window.top.location.hostname;
+          if (topHost !== window.location.hostname &&
+              !topHost.endsWith('google.com') &&
+              !topHost.endsWith('googleusercontent.com') &&
+              !topHost.endsWith('github.io')) {
+            window.top.location = window.self.location;
+          }
+        } catch (e) {
+          console.warn('[Security Guard] Iframe cross-origin terdeteksi.');
+        }
+      }
+    })();
+
+    // 3. Utilitas Sanitasi Data (Pencegahan Serangan XSS)
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function sanitizeUrl(url) {
+      if (!url) return '#';
+      var clean = String(url).trim();
+      if (/^(?:https?:\/\/|mailto:|tel:|\/|\.\/)/i.test(clean)) {
+        return clean;
+      }
+      return '#';
+    }
+
+    // 4. Sistem Anti-Brute Force Login (Pembatasan Percobaan Login Gagal)
+    var LOGIN_GUARD_KEY = 'gmonitor_login_guard';
+    var MAX_FAILED_LOGIN_ATTEMPTS = 5;
+    var LOGIN_LOCKOUT_DURATION_MS = 60 * 1000; // 60 detik penguncian
+
+    function getLoginGuardData() {
+      try {
+        var raw = localStorage.getItem(LOGIN_GUARD_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return { failedAttempts: 0, lockedUntil: 0 };
+    }
+
+    function recordFailedLoginAttempt() {
+      var data = getLoginGuardData();
+      data.failedAttempts = (data.failedAttempts || 0) + 1;
+      if (data.failedAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+        data.lockedUntil = Date.now() + LOGIN_LOCKOUT_DURATION_MS;
+      }
+      try {
+        localStorage.setItem(LOGIN_GUARD_KEY, JSON.stringify(data));
+      } catch (e) {}
+      return data;
+    }
+
+    function clearLoginGuardData() {
+      try {
+        localStorage.removeItem(LOGIN_GUARD_KEY);
+      } catch (e) {}
+    }
+
+    function checkLoginLockout() {
+      var data = getLoginGuardData();
+      if (data.lockedUntil && Date.now() < data.lockedUntil) {
+        var secRemaining = Math.ceil((data.lockedUntil - Date.now()) / 1000);
+        return { isLocked: true, secRemaining: secRemaining };
+      }
+      if (data.lockedUntil && Date.now() >= data.lockedUntil) {
+        clearLoginGuardData();
+      }
+      return { isLocked: false, secRemaining: 0 };
+    }
+
+    var loginLockoutInterval = null;
+    function updateLoginLockoutUI() {
+      var lockout = checkLoginLockout();
+      var btn = document.getElementById('btnLogin');
+      var errBox = document.getElementById('loginError');
+
+      if (lockout.isLocked) {
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-lock text-rose-400"></i><span>Terkunci (' + lockout.secRemaining + ' dtk)</span>';
+        }
+        if (errBox) {
+          errBox.className = 'p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-700 dark:text-rose-300 text-xs font-medium space-y-1';
+          errBox.innerHTML = '<div class="flex items-center gap-1.5 font-bold"><i class="fa-solid fa-shield-halved text-rose-500"></i> Akun Terkunci Sementara</div>' +
+                             '<div>Terlalu banyak percobaan gagal (' + MAX_FAILED_LOGIN_ATTEMPTS + 'x). Mohon tunggu <b>' + lockout.secRemaining + ' detik</b> sebelum mencoba kembali.</div>';
+          errBox.classList.remove('hidden');
+        }
+
+        if (!loginLockoutInterval) {
+          loginLockoutInterval = setInterval(function() {
+            var curr = checkLoginLockout();
+            if (!curr.isLocked) {
+              clearInterval(loginLockoutInterval);
+              loginLockoutInterval = null;
+              if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Masuk ke Aplikasi</span><i class="fa-solid fa-arrow-right"></i>';
+              }
+              if (errBox) errBox.classList.add('hidden');
+            } else {
+              if (btn) btn.innerHTML = '<i class="fa-solid fa-lock text-rose-400"></i><span>Terkunci (' + curr.secRemaining + ' dtk)</span>';
+            }
+          }, 1000);
+        }
+      } else {
+        if (loginLockoutInterval) {
+          clearInterval(loginLockoutInterval);
+          loginLockoutInterval = null;
+        }
+        if (btn && btn.disabled && btn.textContent.includes('Terkunci')) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Masuk ke Aplikasi</span><i class="fa-solid fa-arrow-right"></i>';
+          if (errBox) errBox.classList.add('hidden');
+        }
+      }
+    }
+
+    // 5. Sistem Pemantau Inaktivitas Sesi Otomatis (Inactivity Auto-Logout 15 Menit)
+    var INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000; // 15 menit
+    var INACTIVITY_WARNING_MS = 60 * 1000;       // Peringatan 1 menit sebelum logout
+    var lastUserActivityTimestamp = Date.now();
+    var inactivityCheckInterval = null;
+    var inactivityWarningShown = false;
+
+    function resetUserInactivityTimer() {
+      lastUserActivityTimestamp = Date.now();
+      if (inactivityWarningShown) {
+        inactivityWarningShown = false;
+      }
+    }
+
+    function initInactivitySessionGuard() {
+      var events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+      var throttleTime = 0;
+      events.forEach(function(evt) {
+        window.addEventListener(evt, function() {
+          var now = Date.now();
+          if (now - throttleTime > 3000) { // Throttle pembaruan setiap 3 detik
+            throttleTime = now;
+            resetUserInactivityTimer();
+          }
+        }, { passive: true });
+      });
+
+      if (inactivityCheckInterval) clearInterval(inactivityCheckInterval);
+      inactivityCheckInterval = setInterval(function() {
+        if (!currentUser) return; // Hanya aktif saat pengguna telah login
+        var idleDuration = Date.now() - lastUserActivityTimestamp;
+
+        // Peringatan 60 detik sebelum auto-logout
+        if (idleDuration >= (INACTIVITY_TIMEOUT_MS - INACTIVITY_WARNING_MS) && !inactivityWarningShown) {
+          inactivityWarningShown = true;
+          showCosmicToast({
+            type: 'logout',
+            title: 'PERINGATAN INAKTIVITAS ⏳',
+            message: 'Sesi Berakhir dalam 60 Detik',
+            subDetail: 'Gerakkan mouse atau ketik sesuatu untuk memperpanjang sesi',
+            duration: 6000
+          });
+        }
+
+        // Eksekusi auto-logout jika melewati batas 15 menit
+        if (idleDuration >= INACTIVITY_TIMEOUT_MS) {
+          inactivityWarningShown = false;
+          handleLogout();
+          showCosmicToast({
+            type: 'logout',
+            title: 'SESI DIKUNCI OTOMATIS 🔒',
+            message: 'Inaktivitas 15 Menit',
+            subDetail: 'Sesi ditutup demi menjaga keamanan data dinas di meja kerja',
+            duration: 4000
+          });
+        }
+      }, 5000);
+    }
+
+    // Helper Pemanggilan Aman Live Preview Sheet
+    function openPreviewModalById(staffId) {
+      if (!currentStaffList || currentStaffList.length === 0) return;
+      var staf = currentStaffList.find(function(s) { return String(s.id).trim() === String(staffId).trim(); });
+      if (!staf) return;
+      openPreviewModal(staf.nama, staf.username, staf.sheetUrl, staf.sheetId, staf.totalBaris || 0, staf.unitKerja || '');
+    }
+
+    function quickArchiveSingleStaffById(staffId) {
+      if (!currentStaffList || currentStaffList.length === 0) return;
+      var staf = currentStaffList.find(function(s) { return String(s.id).trim() === String(staffId).trim(); });
+      if (!staf) return;
+      quickArchiveSingleStaff(staf.id, staf.nama);
+    }
+
     var currentUser = null;
     var adminPollTimer = null;
     var staffHeartbeatTimer = null;
@@ -2362,6 +2577,8 @@
       fetchWeatherAndAirQuality();
       initLoginWeatherCanvas();
       checkUrlForPublicVerification();
+      initInactivitySessionGuard();
+      updateLoginLockoutUI();
 
       document.addEventListener('click', function(e) {
         var pw = document.getElementById('prayerWrapper');
@@ -4097,7 +4314,7 @@
       }
 
       // 4. Atur Teks & Keterangan SubDetail
-      titleEl.innerHTML = '<span>' + title + '</span>';
+      titleEl.textContent = title;
       msgEl.textContent = message;
       if (subDetailEl) {
         subDetailEl.textContent = subDetail;
@@ -4192,6 +4409,14 @@
 
     function handleLogin(e) {
       if (e) e.preventDefault();
+
+      // Cek apakah akun sedang dalam masa lockout akibat percobaan berulang
+      var lockout = checkLoginLockout();
+      if (lockout.isLocked) {
+        updateLoginLockoutUI();
+        return;
+      }
+
       var user = document.getElementById('loginUsername').value;
       var pass = document.getElementById('loginPassword').value;
       var btn = document.getElementById('btnLogin');
@@ -4207,10 +4432,23 @@
           btn.innerHTML = '<span>Masuk ke Aplikasi</span><i class="fa-solid fa-arrow-right"></i>';
 
           if (!res || !res.success) {
-            errBox.textContent = (res && res.message) ? res.message : 'Login gagal!';
-            errBox.classList.remove('hidden');
+            var guardData = recordFailedLoginAttempt();
+            if (guardData.lockedUntil && Date.now() < guardData.lockedUntil) {
+              updateLoginLockoutUI();
+            } else {
+              var sisa = MAX_FAILED_LOGIN_ATTEMPTS - guardData.failedAttempts;
+              errBox.className = 'p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-700 dark:text-rose-300 text-xs font-medium space-y-0.5';
+              errBox.innerHTML = '<div class="flex items-center gap-1 font-bold"><i class="fa-solid fa-triangle-exclamation text-rose-500"></i> ' +
+                                 escapeHtml(res && res.message ? res.message : 'Login gagal!') + '</div>' +
+                                 '<div class="text-[11px] text-slate-500 dark:text-slate-400">Sisa percobaan sebelum dikunci: <b>' + sisa + 'x</b></div>';
+              errBox.classList.remove('hidden');
+            }
             return;
           }
+
+          // Login Berhasil -> Bersihkan riwayat lockout & setel ulang monitor inaktivitas
+          clearLoginGuardData();
+          resetUserInactivityTimer();
 
           currentUser = res.user;
 
@@ -4241,6 +4479,7 @@
         .withFailureHandler(function(err) {
           btn.disabled = false;
           btn.innerHTML = '<span>Masuk ke Aplikasi</span>';
+          errBox.className = 'p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-700 dark:text-rose-300 text-xs font-medium';
           errBox.textContent = 'Kesalahan koneksi: ' + err.message;
           errBox.classList.remove('hidden');
         })
@@ -4263,6 +4502,15 @@
       var roleStaf = currentUser ? currentUser.role : '';
       google.script.run.logoutUser(uName);
 
+      // DOM & State Sanitization: Bersihkan state pengguna dan DOM dari memori peramban
+      currentUser = null;
+      currentStaffList = [];
+      cachedArchiveList = [];
+      var sc = document.getElementById('staffCardsContainer'); if (sc) sc.innerHTML = '';
+      var ab = document.getElementById('archiveTableBody'); if (ab) ab.innerHTML = '';
+      var pt = document.getElementById('printPaperStaffTableBody'); if (pt) pt.innerHTML = '';
+      var ps = document.getElementById('printPaperSampleLogTableBody'); if (ps) ps.innerHTML = '';
+
       // THE COSMIC PULSE (GLOW ORBIT) TOAST LOGOUT SUKSES!
       showCosmicToast({
         type: 'logout',
@@ -4273,13 +4521,15 @@
         showWave: true,
         duration: 1600,
         onComplete: function() {
-          currentUser = null;
           document.getElementById('adminSection').classList.add('hidden');
           document.getElementById('staffSection').classList.add('hidden');
           document.getElementById('loginSection').classList.remove('hidden');
           var passInput = document.getElementById('loginPassword');
           if (passInput) passInput.value = '';
+          var userInput = document.getElementById('loginUsername');
+          if (userInput) userInput.value = '';
           initLoginWeatherCanvas();
+          updateLoginLockoutUI();
         }
       });
     }
@@ -4358,7 +4608,7 @@
           var optHtml = '<option value="ALL">Semua Staf Sekaligus</option>';
           for (var i = 0; i < data.staffList.length; i++) {
             var s = data.staffList[i];
-            optHtml += '<option value="' + s.id + '">' + s.nama + ' (' + s.totalBaris + ' Baris)</option>';
+            optHtml += '<option value="' + escapeHtml(s.id) + '">' + escapeHtml(s.nama) + ' (' + escapeHtml(s.totalBaris) + ' Baris)</option>';
           }
           selStaff.innerHTML = optHtml;
           if (currentVal) selStaff.value = currentVal;
@@ -4401,29 +4651,33 @@
         if (staf.noWa && staf.noWa !== '-') {
           var cleanWa = String(staf.noWa).replace(/[^0-9]/g, '');
           if (cleanWa.startsWith('0')) cleanWa = '62' + cleanWa.slice(1);
-          waLink = '<a href="https://wa.me/' + cleanWa + '" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-medium bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">' +
+          waLink = '<a href="https://wa.me/' + cleanWa + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-medium bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">' +
                      '<i class="fa-brands fa-whatsapp text-emerald-500"></i>' +
-                     '<span>' + staf.noWa + '</span>' +
+                     '<span>' + escapeHtml(staf.noWa) + '</span>' +
                    '</a>';
         }
 
         var lastSeenHtml = staf.isOnline
-          ? '<span class="font-bold text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-1"><i class="fa-solid fa-circle-dot animate-pulse"></i> ' + staf.lastSeenText + '</span>'
-          : '<span class="font-medium text-slate-700 dark:text-slate-300 text-xs">' + staf.lastSeenText + '</span>';
+          ? '<span class="font-bold text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-1"><i class="fa-solid fa-circle-dot animate-pulse"></i> ' + escapeHtml(staf.lastSeenText) + '</span>'
+          : '<span class="font-medium text-slate-700 dark:text-slate-300 text-xs">' + escapeHtml(staf.lastSeenText) + '</span>';
+
+        var safeId = escapeHtml(staf.id);
+        var safeNama = escapeHtml(staf.nama);
+        var safeSheetUrl = sanitizeUrl(staf.sheetUrl);
 
         html += '<div class="bg-slate-50 dark:bg-slate-900/90 border ' + cardBorder + ' rounded-2xl p-5 flex flex-col justify-between transition shadow-sm hover:shadow-md">' +
           '<div>' +
             '<div class="flex items-start justify-between gap-3">' +
               '<div class="flex items-center gap-3">' +
                 '<div class="relative w-12 h-12 rounded-2xl overflow-hidden border-2 border-indigo-500/30 shrink-0 bg-white dark:bg-slate-800 shadow-sm">' +
-                  '<img src="' + fotoSrc + '" alt="' + staf.nama + '" referrerpolicy="no-referrer" class="w-full h-full object-cover">' +
+                  '<img src="' + fotoSrc + '" alt="' + safeNama + '" referrerpolicy="no-referrer" class="w-full h-full object-cover">' +
                 '</div>' +
                 '<div>' +
                   '<div class="flex flex-wrap items-center gap-1.5">' +
-                    '<h4 class="font-bold text-slate-900 dark:text-white text-sm">' + staf.nama + '</h4>' +
+                    '<h4 class="font-bold text-slate-900 dark:text-white text-sm">' + safeNama + '</h4>' +
                   '</div>' +
                   '<span class="inline-block mt-0.5 text-[10px] font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 px-2 py-0.5 rounded-full">' +
-                    jabatanText +
+                    escapeHtml(jabatanText) +
                   '</span>' +
                 '</div>' +
               '</div>' +
@@ -4434,18 +4688,18 @@
             '</div>' +
             '<div class="mt-3 space-y-1 text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800 pt-2.5">' +
               '<div class="flex items-center justify-between text-[11px]">' +
-                '<span>NIP: <b class="font-mono text-slate-700 dark:text-slate-200">' + nipText + '</b></span>' +
-                '<span>ID: <code>' + staf.id + '</code></span>' +
+                '<span>NIP: <b class="font-mono text-slate-700 dark:text-slate-200">' + escapeHtml(nipText) + '</b></span>' +
+                '<span>ID: <code>' + safeId + '</code></span>' +
               '</div>' +
               '<div class="flex items-center justify-between text-[11px]">' +
-                '<span class="truncate mr-2"><i class="fa-solid fa-building text-slate-400 mr-1"></i>' + unitText + '</span>' +
+                '<span class="truncate mr-2"><i class="fa-solid fa-building text-slate-400 mr-1"></i>' + escapeHtml(unitText) + '</span>' +
                 (waLink ? waLink : '') +
               '</div>' +
             '</div>' +
             '<div class="mt-3 grid grid-cols-2 gap-2 bg-white dark:bg-slate-800/80 rounded-xl p-3 border border-slate-200 dark:border-slate-700/60 text-xs">' +
               '<div>' +
                 '<span class="text-slate-400 block text-[11px]">Baris Terisi:</span>' +
-                '<span class="font-bold text-slate-900 dark:text-white text-base">' + staf.totalBaris + ' <small class="text-slate-400 font-normal">Baris</small></span>' +
+                '<span class="font-bold text-slate-900 dark:text-white text-base">' + escapeHtml(staf.totalBaris || 0) + ' <small class="text-slate-400 font-normal">Baris</small></span>' +
               '</div>' +
               '<div>' +
                 '<span class="text-slate-400 block text-[11px]">Aktivitas Terakhir:</span>' +
@@ -4454,18 +4708,18 @@
             '</div>' +
           '</div>' +
           '<div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center gap-1.5">' +
-            '<button type="button" onclick="openPreviewModal(\'' + staf.nama + '\', \'' + staf.username + '\', \'' + staf.sheetUrl + '\', \'' + staf.sheetId + '\', ' + (staf.totalBaris || 0) + ', \'' + (staf.unitKerja || '') + '\')" ' +
+            '<button type="button" onclick="openPreviewModalById(\'' + safeId + '\')" ' +
               'class="flex-1 py-2 bg-indigo-600/15 hover:bg-indigo-600 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">' +
               '<i class="fa-solid fa-table-cells"></i><span>Live Sheet</span>' +
             '</button>' +
-            '<button type="button" onclick="openEditStaffModal(\'' + staf.id + '\')" ' +
+            '<button type="button" onclick="openEditStaffModal(\'' + safeId + '\')" ' +
               'class="px-2.5 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1 transition" title="Edit Data & Profil Staf">' +
               '<i class="fa-solid fa-user-pen text-indigo-500"></i><span>Edit</span>' +
             '</button>' +
-            '<a href="' + staf.sheetUrl + '" target="_blank" class="p-2 bg-emerald-600/15 hover:bg-emerald-600 text-emerald-600 hover:text-white border border-emerald-500/30 rounded-xl text-xs transition flex items-center justify-center" title="Buka Langsung di Google Spreadsheets">' +
+            '<a href="' + safeSheetUrl + '" target="_blank" rel="noopener noreferrer" class="p-2 bg-emerald-600/15 hover:bg-emerald-600 text-emerald-600 hover:text-white border border-emerald-500/30 rounded-xl text-xs transition flex items-center justify-center" title="Buka Langsung di Google Spreadsheets">' +
               '<i class="fa-solid fa-arrow-up-right-from-square"></i>' +
             '</a>' +
-            '<button type="button" onclick="quickArchiveSingleStaff(\'' + staf.id + '\', \'' + staf.nama + '\')" ' +
+            '<button type="button" onclick="quickArchiveSingleStaffById(\'' + safeId + '\')" ' +
               'class="p-2 bg-amber-500/15 hover:bg-amber-500 border border-amber-500/30 text-amber-600 dark:text-amber-300 hover:text-slate-950 rounded-xl text-xs font-semibold transition flex items-center justify-center" title="Arsipkan File Staf Ini">' +
               '<i class="fa-solid fa-box-archive"></i>' +
             '</button>' +
@@ -4484,9 +4738,9 @@
       var html = '';
       for (var i = 0; i < folders.length; i++) {
         var f = folders[i];
-        html += '<a href="' + f.url + '" target="_blank" class="px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-amber-500/10 border border-slate-300 dark:border-slate-700 rounded-xl text-xs flex items-center gap-2 transition">' +
+        html += '<a href="' + sanitizeUrl(f.url) + '" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-amber-500/10 border border-slate-300 dark:border-slate-700 rounded-xl text-xs flex items-center gap-2 transition">' +
                   '<i class="fa-solid fa-folder text-amber-400"></i>' +
-                  '<span>Folder <b>' + f.yearName + '</b></span>' +
+                  '<span>Folder <b>' + escapeHtml(f.yearName) + '</b></span>' +
                 '</a>';
       }
       container.innerHTML = html;
@@ -4502,7 +4756,7 @@
       var years = Object.keys(yearsMap).sort();
       var html = '<option value="ALL">Semua Tahun (' + list.length + ')</option>';
       for (var j = 0; j < years.length; j++) {
-        html += '<option value="' + years[j] + '">Tahun ' + years[j] + '</option>';
+        html += '<option value="' + escapeHtml(years[j]) + '">Tahun ' + escapeHtml(years[j]) + '</option>';
       }
       sel.innerHTML = html;
       if (current) sel.value = current;
@@ -4528,16 +4782,16 @@
         var item = filtered[j];
         html += '<tr class="hover:bg-slate-100 dark:hover:bg-slate-800/50">' +
           '<td class="p-3 font-bold text-amber-500">' +
-            '<a href="' + item.urlFolderTahun + '" target="_blank" class="flex items-center gap-1 hover:underline">' +
-              '<i class="fa-solid fa-folder-open"></i> ' + item.tahun +
+            '<a href="' + sanitizeUrl(item.urlFolderTahun) + '" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 hover:underline">' +
+              '<i class="fa-solid fa-folder-open"></i> ' + escapeHtml(item.tahun) +
             '</a>' +
           '</td>' +
-          '<td class="p-3 font-medium">' + item.namaStaf + '</td>' +
-          '<td class="p-3">' + item.namaFile + '</td>' +
-          '<td class="p-3 text-center font-bold text-emerald-500">' + item.totalBaris + '</td>' +
-          '<td class="p-3 text-slate-400">' + item.waktuArsip + '</td>' +
+          '<td class="p-3 font-medium">' + escapeHtml(item.namaStaf) + '</td>' +
+          '<td class="p-3">' + escapeHtml(item.namaFile) + '</td>' +
+          '<td class="p-3 text-center font-bold text-emerald-500">' + escapeHtml(item.totalBaris) + '</td>' +
+          '<td class="p-3 text-slate-400">' + escapeHtml(item.waktuArsip) + '</td>' +
           '<td class="p-3 text-right">' +
-            '<a href="' + item.urlFile + '" target="_blank" class="px-2.5 py-1 bg-indigo-600/15 hover:bg-indigo-600 text-indigo-600 dark:text-indigo-300 hover:text-white rounded-lg text-[11px] font-semibold inline-flex items-center gap-1">' +
+            '<a href="' + sanitizeUrl(item.urlFile) + '" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-indigo-600/15 hover:bg-indigo-600 text-indigo-600 dark:text-indigo-300 hover:text-white rounded-lg text-[11px] font-semibold inline-flex items-center gap-1">' +
               '<i class="fa-solid fa-file-lines"></i> Buka' +
             '</a>' +
           '</td>' +
@@ -4885,9 +5139,9 @@
       var rowsBadge = document.getElementById('previewStaffRowsBadge');
       if (rowsBadge) rowsBadge.textContent = (totalBaris || 0) + ' Baris Terisi';
       var linkBtn = document.getElementById('previewModalExternalLink');
-      if (linkBtn) linkBtn.href = sheetUrl || '#';
+      if (linkBtn) linkBtn.href = sanitizeUrl(sheetUrl) || '#';
       var directLink = document.getElementById('previewModalDirectLink');
-      if (directLink) directLink.href = sheetUrl || '#';
+      if (directLink) directLink.href = sanitizeUrl(sheetUrl) || '#';
 
       var iframe = document.getElementById('previewSheetIframe');
       if (iframe) {
@@ -4901,7 +5155,7 @@
             embedUrl += '&rm=embedded';
           }
         }
-        iframe.src = embedUrl;
+        iframe.src = sanitizeUrl(embedUrl);
       }
 
       document.getElementById('modalPreviewSheet').classList.remove('hidden');
@@ -5678,14 +5932,14 @@
             tr.className = (idx % 2 === 1) ? 'bg-slate-50/70' : 'bg-white';
             tr.innerHTML = '<td class="border border-slate-800 px-2 py-1.5 text-center font-bold">' + (idx + 1) + '</td>' +
                            '<td class="border border-slate-800 px-3 py-1.5 text-left font-sans">' +
-                             '<div class="font-bold text-slate-900 leading-tight">' + s.nama + '</div>' +
-                             '<div class="text-[10px] text-slate-600 font-mono">NIP. ' + s.nip + '</div>' +
+                             '<div class="font-bold text-slate-900 leading-tight">' + escapeHtml(s.nama) + '</div>' +
+                             '<div class="text-[10px] text-slate-600 font-mono">NIP. ' + escapeHtml(s.nip) + '</div>' +
                            '</td>' +
-                           '<td class="border border-slate-800 px-2 py-1.5 text-left text-[11px] leading-tight">' + s.jabatan + '<br><span class="text-slate-500 text-[10px]">' + s.unitKerja + '</span></td>' +
-                           '<td class="border border-slate-800 px-2 py-1.5 text-center font-bold text-slate-900">' + s.total + '</td>' +
-                           '<td class="border border-slate-800 px-2 py-1.5 text-center font-semibold text-amber-700">' + s.manual + '</td>' +
-                           '<td class="border border-slate-800 px-2 py-1.5 text-center font-semibold text-indigo-700">' + s.stt + '</td>' +
-                           '<td class="border border-slate-800 px-2 py-1.5 text-center font-bold text-emerald-700">' + s.ratio + '%</td>' +
+                           '<td class="border border-slate-800 px-2 py-1.5 text-left text-[11px] leading-tight">' + escapeHtml(s.jabatan) + '<br><span class="text-slate-500 text-[10px]">' + escapeHtml(s.unitKerja) + '</span></td>' +
+                           '<td class="border border-slate-800 px-2 py-1.5 text-center font-bold text-slate-900">' + escapeHtml(s.total) + '</td>' +
+                           '<td class="border border-slate-800 px-2 py-1.5 text-center font-semibold text-amber-700">' + escapeHtml(s.manual) + '</td>' +
+                           '<td class="border border-slate-800 px-2 py-1.5 text-center font-semibold text-indigo-700">' + escapeHtml(s.stt) + '</td>' +
+                           '<td class="border border-slate-800 px-2 py-1.5 text-center font-bold text-emerald-700">' + escapeHtml(s.ratio) + '%</td>' +
                            '<td class="border border-slate-800 px-2 py-1.5 text-center">' + s.statusBadge + '</td>';
             staffTbody.appendChild(tr);
           });
@@ -5712,10 +5966,10 @@
             var tr = document.createElement('tr');
             tr.className = (idx % 2 === 1) ? 'bg-slate-50/70' : 'bg-white';
             tr.innerHTML = '<td class="border border-slate-800 px-1 py-1 text-center font-bold">' + (idx + 1) + '</td>' +
-                           '<td class="border border-slate-800 px-1.5 py-1 text-center font-mono text-[10px]">' + timeStr + '</td>' +
-                           '<td class="border border-slate-800 px-2 py-1 text-left font-medium leading-tight">' + item.nama + '</td>' +
-                           '<td class="border border-slate-800 px-1 py-1 text-center font-mono font-bold text-indigo-600">' + item.coord + '</td>' +
-                           '<td class="border border-slate-800 px-2 py-1 text-left text-[10px] text-slate-700 leading-snug">' + item.snippet + '</td>' +
+                           '<td class="border border-slate-800 px-1.5 py-1 text-center font-mono text-[10px]">' + escapeHtml(timeStr) + '</td>' +
+                           '<td class="border border-slate-800 px-2 py-1 text-left font-medium leading-tight">' + escapeHtml(item.nama) + '</td>' +
+                           '<td class="border border-slate-800 px-1 py-1 text-center font-mono font-bold text-indigo-600">' + escapeHtml(item.coord) + '</td>' +
+                           '<td class="border border-slate-800 px-2 py-1 text-left text-[10px] text-slate-700 leading-snug">' + escapeHtml(item.snippet) + '</td>' +
                            '<td class="border border-slate-800 px-1 py-1 text-center">' + methodBadge + '</td>';
             sampleTbody.appendChild(tr);
           });
