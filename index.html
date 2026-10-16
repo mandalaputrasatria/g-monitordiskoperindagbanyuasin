@@ -2375,9 +2375,9 @@
       }
     }
 
-    // 5. Sistem Pemantau Inaktivitas Sesi Otomatis (Inactivity Auto-Logout 15 Menit)
-    var INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000; // 15 menit
-    var INACTIVITY_WARNING_MS = 60 * 1000;       // Peringatan 1 menit sebelum logout
+    // 5. Sistem Pemantau Inaktivitas Sesi Otomatis (Inactivity Auto-Logout 5 Menit - Berlaku untuk Admin & Staf)
+    var INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;  // 5 menit
+    var INACTIVITY_WARNING_MS = 60 * 1000;      // Peringatan 1 menit (60 detik) sebelum logout
     var lastUserActivityTimestamp = Date.now();
     var inactivityCheckInterval = null;
     var inactivityWarningShown = false;
@@ -2390,12 +2390,12 @@
     }
 
     function initInactivitySessionGuard() {
-      var events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+      var events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
       var throttleTime = 0;
       events.forEach(function(evt) {
         window.addEventListener(evt, function() {
           var now = Date.now();
-          if (now - throttleTime > 3000) { // Throttle pembaruan setiap 3 detik
+          if (now - throttleTime > 2000) { // Throttle pembaruan setiap 2 detik
             throttleTime = now;
             resetUserInactivityTimer();
           }
@@ -2404,8 +2404,9 @@
 
       if (inactivityCheckInterval) clearInterval(inactivityCheckInterval);
       inactivityCheckInterval = setInterval(function() {
-        if (!currentUser) return; // Hanya aktif saat pengguna telah login
+        if (!currentUser) return; // Aktif untuk pengguna yang login (Administrator maupun Staf Pegawai)
         var idleDuration = Date.now() - lastUserActivityTimestamp;
+        var roleLabel = (currentUser.role === 'ADMIN') ? 'Administrator' : 'Staf Pegawai';
 
         // Peringatan 60 detik sebelum auto-logout
         if (idleDuration >= (INACTIVITY_TIMEOUT_MS - INACTIVITY_WARNING_MS) && !inactivityWarningShown) {
@@ -2413,22 +2414,22 @@
           showCosmicToast({
             type: 'logout',
             title: 'PERINGATAN INAKTIVITAS ⏳',
-            message: 'Sesi Berakhir dalam 60 Detik',
-            subDetail: 'Gerakkan mouse atau ketik sesuatu untuk memperpanjang sesi',
+            message: 'Sesi ' + roleLabel + ' Berakhir dalam 60 Detik',
+            subDetail: 'Gerakkan mouse, ketik, atau bicara ke mikrofon untuk memperpanjang sesi',
             duration: 6000
           });
         }
 
-        // Eksekusi auto-logout jika melewati batas 15 menit
+        // Eksekusi auto-logout jika melewati batas 5 menit
         if (idleDuration >= INACTIVITY_TIMEOUT_MS) {
           inactivityWarningShown = false;
           handleLogout();
           showCosmicToast({
             type: 'logout',
             title: 'SESI DIKUNCI OTOMATIS 🔒',
-            message: 'Inaktivitas 15 Menit',
-            subDetail: 'Sesi ditutup demi menjaga keamanan data dinas di meja kerja',
-            duration: 4000
+            message: 'Inaktivitas 5 Menit (' + roleLabel + ')',
+            subDetail: 'Sesi ' + roleLabel + ' ditutup demi menjaga keamanan data dinas di meja kerja',
+            duration: 4500
           });
         }
       }, 5000);
@@ -3698,6 +3699,7 @@
       };
 
       speechRec.onresult = function(event) {
+        resetUserInactivityTimer();
         var interimText = '';
         for (var i = event.resultIndex; i < event.results.length; i++) {
           var transcript = event.results[i][0].transcript;
