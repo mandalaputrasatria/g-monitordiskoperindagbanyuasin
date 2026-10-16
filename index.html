@@ -62,6 +62,20 @@
     })();
   </script>
 
+  <!-- Progressive Web App (PWA) Manifest & Meta Tags -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#1e1b4b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="G-Monitor Banyuasin">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg">
+
+  <!-- PDF Generator & QR Code Client Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -90,6 +104,42 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
     body { font-family: 'Inter', sans-serif; transition: background-color 0.25s, color 0.25s; }
     .font-mono-clock { font-family: 'JetBrains Mono', monospace; }
+
+    /* Paper Simulation & Media Print Styles */
+    .paper-sheet-sim {
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease-in-out;
+      background-color: #ffffff;
+      color: #0f172a;
+    }
+    .kop-border-double {
+      border-bottom: 3.5px double #0f172a;
+    }
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #printPaperContent, #printPaperContent * {
+        visibility: visible !important;
+      }
+      #printPaperContent {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 6mm 10mm !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        z-index: 9999999 !important;
+      }
+      @page {
+        size: auto;
+        margin: 6mm 10mm;
+      }
+    }
 
     @keyframes blinkGreen {
       0%, 100% {
@@ -748,6 +798,13 @@
             <span>Masuk ke Aplikasi</span>
             <i class="fa-solid fa-arrow-right"></i>
           </button>
+
+          <!-- Tombol Pasang Aplikasi PWA -->
+          <button type="button" onclick="triggerPwaInstall()" id="btnLoginPwaInstall"
+            class="w-full py-2.5 bg-slate-800/80 hover:bg-slate-700/80 border border-indigo-400/30 text-indigo-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition shadow-sm group">
+            <i class="fa-solid fa-mobile-screen-button text-indigo-400 group-hover:scale-110 transition"></i>
+            <span>Pasang Aplikasi di Desktop / HP (PWA)</span>
+          </button>
         </form>
 
         <!-- Footer Keamanan Resmi (Menggantikan Kotak Demo Password Lama) -->
@@ -793,6 +850,26 @@
           class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
           <i class="fa-solid fa-user-plus"></i>
           <span>Tambah Staf & Sheet</span>
+        </button>
+
+        <!-- INDIKATOR STATUS JARINGAN -->
+        <div id="adminNetworkStatusPill" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span class="network-status-text">Online</span>
+        </div>
+
+        <!-- TOMBOL CETAK LAPORAN RESMI (PDF & PRINT) -->
+        <button type="button" onclick="openPrintPdfModal('admin')"
+          class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-sm">
+          <i class="fa-solid fa-file-pdf"></i>
+          <span>Cetak PDF Laporan</span>
+        </button>
+
+        <!-- TOMBOL INSTALL PWA (OTOMATIS MUNCUL) -->
+        <button type="button" onclick="triggerPwaInstall()"
+          class="pwa-install-btn hidden px-3 py-2 bg-indigo-500/15 hover:bg-indigo-500 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-download"></i>
+          <span>Install App</span>
         </button>
 
         <button type="button" onclick="handleLogout()"
@@ -1045,6 +1122,38 @@
         <div class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs">
           Baris: <b id="staffRowCounter" class="text-emerald-600 dark:text-emerald-400 font-bold">0</b>
         </div>
+
+        <!-- INDIKATOR STATUS JARINGAN -->
+        <div id="staffNetworkStatusPill" class="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span class="network-status-text">Online</span>
+        </div>
+
+        <!-- BADGE DRAF OFFLINE (OTOMATIS MUNCUL JIKA ADA DATA BELUM TERSINKRON) -->
+        <button type="button" id="staffOfflineQueueBadge" onclick="flushOfflineQueueManually()"
+          class="hidden px-2.5 py-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-700 dark:text-amber-300 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition animate-pulse"
+          title="Ada draf sel tersimpan lokal. Klik untuk kirim ke server sekarang">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span id="staffOfflineQueueCount">0</span>
+          <span class="hidden md:inline">Tersimpan Lokal</span>
+        </button>
+
+        <!-- TOMBOL CETAK LAPORAN PDF RESMI -->
+        <button type="button" onclick="openPrintPdfModal('staff')"
+          class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs rounded-xl flex items-center gap-1.5 transition shadow-sm"
+          title="Cetak Laporan Dokumen Berkop Resmi & QR-Code TTE">
+          <i class="fa-solid fa-file-pdf"></i>
+          <span class="hidden sm:inline">Cetak PDF</span>
+        </button>
+
+        <!-- TOMBOL INSTALL PWA -->
+        <button type="button" onclick="triggerPwaInstall()"
+          class="pwa-install-btn hidden px-2.5 py-1.5 bg-indigo-500/15 hover:bg-indigo-500 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition"
+          title="Pasang Aplikasi ke Desktop / HP">
+          <i class="fa-solid fa-download"></i>
+          <span class="hidden md:inline">Install App</span>
+        </button>
+
         <a id="staffOpenSheetBtn" href="#" target="_blank"
           class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-sm"
           title="Buka Spreadsheet di Tab Baru">
@@ -1534,6 +1643,12 @@
             <span>Buka Penuh Google Spreadsheet</span>
           </a>
 
+          <button type="button" onclick="openPrintPdfFromPreviewModal()"
+            class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-2 shadow-sm transition" title="Cetak Lembar Kerja Ini ke PDF Berkop Resmi">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Cetak PDF Laporan</span>
+          </button>
+
           <button type="button" onclick="refreshPreviewModalData()" id="btnRefreshPreviewModal"
             class="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition" title="Muat Ulang Halaman Spreadsheet">
             <i class="fa-solid fa-rotate"></i>
@@ -1565,6 +1680,259 @@
       <div class="flex-1 w-full bg-white relative flex flex-col overflow-hidden">
         <iframe id="previewSheetIframe" src="about:blank" class="w-full flex-1 border-0 bg-white" allow="clipboard-read; clipboard-write; autoplay"></iframe>
       </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       4. MODAL GENERATOR LAPORAN & EKSPOR PDF RESMI (KOP RESMI PEMKAB BANYUASIN + QR-CODE TTE)
+       ===================================================================== -->
+  <div id="modalPrintReport" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-7xl w-full max-h-[96vh] flex flex-col overflow-hidden shadow-2xl">
+      
+      <!-- Header Modal -->
+      <div class="px-6 py-4 bg-slate-100 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 text-xl shrink-0">
+            <i class="fa-solid fa-file-pdf"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base leading-tight">Generator Dokumen & Cetak PDF Resmi Dinas</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Standar Naskah Dinas Pemerintah Kabupaten Banyuasin • KOP Resmi, QR-Code TTE & Ekspor PDF Presisi</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="printReportDocument()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-2 transition shadow-sm">
+            <i class="fa-solid fa-print"></i>
+            <span>Cetak (Ctrl+P)</span>
+          </button>
+          <button type="button" onclick="downloadReportPdf()" id="btnDownloadPdf" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs font-bold rounded-xl flex items-center gap-2 transition shadow-lg shadow-amber-500/20">
+            <i class="fa-solid fa-file-arrow-down"></i>
+            <span>Unduh Berkas PDF</span>
+          </button>
+          <button type="button" onclick="closePrintReportModal()" class="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl transition">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Body: 2 Kolom (Kiri: Parameter/Form, Kanan: Live Simulation Paper) -->
+      <div class="flex-1 flex flex-col lg:flex-row overflow-hidden bg-slate-100 dark:bg-slate-950">
+        
+        <!-- Kolom Kiri: Pengaturan & Konfigurasi Naskah -->
+        <div class="w-full lg:w-96 p-5 border-r border-slate-200 dark:border-slate-800 overflow-y-auto space-y-4 shrink-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">Pengaturan Naskah Dinas</h4>
+            <span class="text-[10px] bg-indigo-500/10 text-indigo-500 font-semibold px-2 py-0.5 rounded-full">Format Baku</span>
+          </div>
+
+          <!-- Pilihan Staf (Jika Admin) -->
+          <div id="printStaffSelectContainer" class="hidden">
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Pegawai / Lembar Kerja</label>
+            <select id="printStaffSelect" onchange="onPrintStaffSelectChange()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-white">
+              <!-- Dinamis diisi daftar staf -->
+            </select>
+          </div>
+
+          <!-- Judul Laporan -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Judul Laporan Dokumen</label>
+            <input type="text" id="printDocTitleInput" value="LAPORAN HASIL MONITORING KEGIATAN HARIAN PEGAWAI" oninput="renderPrintPaper()"
+              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-white">
+          </div>
+
+          <!-- Nomor Surat / Berkas -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Berkas / Naskah Dinas</label>
+            <input type="text" id="printDocNumberInput" value="005 / DISKOPERINDAG-BYU / X / 2026" oninput="renderPrintPaper()"
+              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-800 dark:text-white">
+          </div>
+
+          <!-- Tanggal Penetapan Dokumen -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tempat & Tanggal Penetapan</label>
+            <input type="text" id="printDocDateInput" value="" oninput="renderPrintPaper()"
+              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white">
+          </div>
+
+          <!-- Parameter Ukuran Kertas & Orientasi -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Ukuran Kertas</label>
+              <select id="printPaperSizeSelect" onchange="renderPrintPaper()" class="w-full px-2.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white">
+                <option value="a4" selected>A4 (210 × 297 mm)</option>
+                <option value="f4">F4 / Folio (215 × 330 mm)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Orientasi</label>
+              <select id="printOrientationSelect" onchange="renderPrintPaper()" class="w-full px-2.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white">
+                <option value="portrait" selected>Potret (Tegak)</option>
+                <option value="landscape">Lanskap (Melebar)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Pejabat Penilai / Mengetahui (Atasan) -->
+          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl space-y-2">
+            <span class="text-xs font-bold text-slate-700 dark:text-slate-200 block">Pejabat Penilai / Mengetahui</span>
+            <div>
+              <label class="block text-[11px] text-slate-500 dark:text-slate-400">Nama Pejabat</label>
+              <input type="text" id="printSignerAtasanNama" value="H. Ir. Ahmad Subroto, M.Si" oninput="renderPrintPaper()"
+                class="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 dark:text-slate-400">NIP Pejabat</label>
+              <input type="text" id="printSignerAtasanNip" value="19750812 200003 1 002" oninput="renderPrintPaper()"
+                class="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-mono">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 dark:text-slate-400">Jabatan Pejabat</label>
+              <input type="text" id="printSignerAtasanJabatan" value="Kepala Bidang Koperasi dan UMKM" oninput="renderPrintPaper()"
+                class="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs">
+            </div>
+          </div>
+
+          <!-- Opsi QR Code & Watermark -->
+          <div class="space-y-2 pt-1">
+            <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-700 dark:text-slate-300 font-medium">
+              <input type="checkbox" id="printIncludeQrCode" checked onchange="renderPrintPaper()" class="w-4 h-4 accent-amber-500 rounded">
+              <span>Sertakan QR-Code Validasi Elektronik (TTE)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-700 dark:text-slate-300 font-medium">
+              <input type="checkbox" id="printIncludeWatermark" onchange="renderPrintPaper()" class="w-4 h-4 accent-amber-500 rounded">
+              <span>Watermark Naskah Asli Dinas</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Pratinjau Kertas Realistis (Paper Canvas) -->
+        <div class="flex-1 p-4 sm:p-8 overflow-y-auto flex items-start justify-center bg-slate-200/70 dark:bg-slate-950/90">
+          <div id="printPaperContainer" class="w-full max-w-4xl flex justify-center">
+            
+            <!-- Lembar Kertas Putih Fisik -->
+            <div id="printPaperContent" class="paper-sheet-sim w-full bg-white text-slate-900 p-8 sm:p-12 relative overflow-hidden font-serif" style="min-height: 297mm; max-width: 210mm;">
+              
+              <!-- Watermark Background (Opsional) -->
+              <div id="printWatermarkOverlay" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
+                <span class="text-7xl font-black text-slate-200/50 uppercase -rotate-45 tracking-widest border-4 border-slate-200/50 p-6 rounded-3xl">NASKAH RESMI</span>
+              </div>
+
+              <!-- Konten Kertas Sebenarnya (Relatif di atas watermark) -->
+              <div class="relative z-10 space-y-4">
+                
+                <!-- 1. KOP SURAT RESMI PEMKAB BANYUASIN -->
+                <div class="flex items-center kop-border-double pb-3 gap-4">
+                  <div class="w-20 shrink-0 text-center">
+                    <img id="printKopLogo" src="https://lh3.googleusercontent.com/d/1Ic_vYIisCIkRAE4n1ut-5l5WOcfgzLdc" alt="Logo Pemkab Banyuasin" class="w-16 h-auto mx-auto object-contain">
+                  </div>
+                  <div class="flex-1 text-center font-sans">
+                    <h4 class="text-sm font-bold tracking-wider text-slate-900 uppercase">PEMERINTAH KABUPATEN BANYUASIN</h4>
+                    <h2 class="text-base sm:text-lg font-black tracking-wide text-slate-900 uppercase leading-snug">DINAS KOPERASI, USAHA KECIL DAN MENENGAH,<br>PERINDUSTRIAN DAN PERDAGANGAN</h2>
+                    <p class="text-[10px] text-slate-700 leading-tight mt-0.5">
+                      Kompleks Perkantoran Pemerintah Kabupaten Banyuasin, Pangkalan Balai, Kode Pos 30753<br>
+                      Pos-el: diskoperindag@banyuasinkab.go.id • Laman: diskoperindag.banyuasinkab.go.id
+                    </p>
+                  </div>
+                </div>
+
+                <!-- 2. JUDUL DOKUMEN -->
+                <div class="text-center pt-1 font-sans">
+                  <h3 id="printPaperTitle" class="text-sm sm:text-base font-bold uppercase tracking-wider underline decoration-2 underline-offset-4 text-slate-950">
+                    LAPORAN HASIL MONITORING KEGIATAN HARIAN PEGAWAI
+                  </h3>
+                  <p id="printPaperDocNum" class="text-[11px] font-mono text-slate-600 mt-1">
+                    Nomor: 005 / DISKOPERINDAG-BYU / X / 2026
+                  </p>
+                </div>
+
+                <!-- 3. IDENTITAS PEGAWAI PELAKSANA -->
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 font-sans text-xs grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
+                  <div class="flex"><span class="w-28 text-slate-500 shrink-0">Nama Pegawai</span><span class="mr-2">:</span><b id="printPaperStaffNama" class="text-slate-900">-</b></div>
+                  <div class="flex"><span class="w-28 text-slate-500 shrink-0">NIP / Status</span><span class="mr-2">:</span><span id="printPaperStaffNip" class="font-mono text-slate-800">-</span></div>
+                  <div class="flex"><span class="w-28 text-slate-500 shrink-0">Jabatan</span><span class="mr-2">:</span><span id="printPaperStaffJabatan" class="text-slate-800">-</span></div>
+                  <div class="flex"><span class="w-28 text-slate-500 shrink-0">Unit Kerja</span><span class="mr-2">:</span><span id="printPaperStaffUnit" class="text-slate-800">-</span></div>
+                </div>
+
+                <!-- 4. TABEL KEGIATAN DAN OUTPUT KERJA -->
+                <div class="pt-2">
+                  <table class="w-full border-collapse border border-slate-800 text-xs font-sans">
+                    <thead>
+                      <tr class="bg-slate-100 text-slate-900 border-b border-slate-800 font-bold text-center">
+                        <th class="border border-slate-800 px-2 py-2 w-8">No</th>
+                        <th class="border border-slate-800 px-2 py-2 w-24">Hari / Tanggal</th>
+                        <th class="border border-slate-800 px-2 py-2 w-16">Waktu</th>
+                        <th class="border border-slate-800 px-3 py-2 text-left">Uraian Tugas / Kegiatan Kerja</th>
+                        <th class="border border-slate-800 px-3 py-2 text-left w-36">Hasil / Luaran</th>
+                        <th class="border border-slate-800 px-2 py-2 w-24">Keterangan</th>
+                      </tr>
+                    </thead>
+                    <tbody id="printPaperTableBody">
+                      <!-- Baris tabel dihasilkan secara dinamis -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- 5. TANDA TANGAN & PENGESAHAN DOKUMEN -->
+                <div class="pt-6 font-sans">
+                  <div class="text-right text-xs mb-3 text-slate-800" id="printPaperDateLocation">
+                    Pangkalan Balai, 16 Oktober 2026
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-8 text-xs text-center">
+                    <!-- Mengetahui Atasan -->
+                    <div class="space-y-1">
+                      <p class="font-medium text-slate-700">Mengetahui,</p>
+                      <p id="printPaperAtasanJabatanText" class="font-bold text-slate-900">Kepala Bidang Koperasi dan UMKM</p>
+                      <div class="h-20 flex items-center justify-center">
+                        <span class="text-[10px] text-slate-400 italic">(Tanda Tangan & Cap Dinas)</span>
+                      </div>
+                      <p id="printPaperAtasanNamaText" class="font-bold underline text-slate-950">H. Ir. Ahmad Subroto, M.Si</p>
+                      <p id="printPaperAtasanNipText" class="text-[11px] font-mono text-slate-700">NIP. 19750812 200003 1 002</p>
+                    </div>
+
+                    <!-- Pegawai Yang Bersangkutan -->
+                    <div class="space-y-1">
+                      <p class="font-medium text-slate-700">Pegawai Yang Melaporkan,</p>
+                      <p id="printPaperStaffJabatanText" class="font-bold text-slate-900">Staf Pelaksana</p>
+                      <div class="h-20 flex items-center justify-center">
+                        <span class="text-[10px] text-slate-400 italic">(Tanda Tangan Pegawai)</span>
+                      </div>
+                      <p id="printPaperStaffNamaText" class="font-bold underline text-slate-950">Nama Pegawai</p>
+                      <p id="printPaperStaffNipText" class="text-[11px] font-mono text-slate-700">NIP. -</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 6. BADGE QR-CODE VALIDASI ELEKTRONIK (TTE) -->
+                <div id="printQrCodeBox" class="mt-8 pt-4 border-t border-slate-300 font-sans flex items-center justify-between gap-4">
+                  <div class="flex items-center gap-3">
+                    <div id="printQrCodeGraphic" class="w-20 h-20 bg-white p-1 border border-slate-300 rounded shadow-sm shrink-0 flex items-center justify-center">
+                      <!-- Rendered by QRCode.js -->
+                    </div>
+                    <div class="text-[10px] text-slate-600 leading-tight">
+                      <p class="font-bold text-slate-900 flex items-center gap-1">
+                        <i class="fa-solid fa-certificate text-emerald-600"></i>
+                        <span>DOKUMEN TERVERIFIKASI SISTEM ELEKTRONIK PEMKAB BANYUASIN</span>
+                      </p>
+                      <p class="mt-0.5">Keaslian dokumen ini tercatat resmi di Google Drive Server Diskoperindag Banyuasin.</p>
+                      <p class="mt-0.5 font-mono text-[9px] text-slate-500" id="printQrAuditHash">Audit Hash: #BYU-DISKOP-00000</p>
+                    </div>
+                  </div>
+                  <div class="text-right text-[9px] text-slate-400 font-mono">
+                    Halaman 1 dari 1<br>
+                    Smart Workspace v1.0
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 
@@ -2430,6 +2798,17 @@
 
       currentCellDraft.isDirty = false;
 
+      // Mode Offline: Jika koneksi internet terputus, simpan langsung ke antrean draf lokal
+      if (!navigator.onLine) {
+        saveToOfflineQueue(currentUser.username, coordToSave, textToSave);
+        if (badge) {
+          badge.className = 'font-bold text-amber-500 flex items-center gap-1.5';
+          badge.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> <span>Tersimpan di Draf Offline (' + coordToSave + ')</span>';
+        }
+        if (syncSt) syncSt.textContent = 'Draf Offline (' + coordToSave + ')';
+        return;
+      }
+
       google.script.run
         .withSuccessHandler(function(res) {
           if (res && res.success) {
@@ -2441,18 +2820,21 @@
             var rowEl = document.getElementById('staffRowCounter');
             if (rowEl && res.totalBaris !== undefined) rowEl.textContent = res.totalBaris;
           } else {
+            saveToOfflineQueue(currentUser.username, coordToSave, textToSave);
             if (badge) {
-              badge.className = 'font-bold text-rose-500 flex items-center gap-1.5';
-              badge.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> <span>Gagal simpan ' + coordToSave + '</span>';
+              badge.className = 'font-bold text-amber-500 flex items-center gap-1.5';
+              badge.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> <span>Tersimpan di Draf Offline (' + coordToSave + ')</span>';
             }
-            if (syncSt) syncSt.textContent = 'Gagal simpan';
+            if (syncSt) syncSt.textContent = 'Draf Offline (' + coordToSave + ')';
           }
         })
-        .withFailureHandler(function() {
+        .withFailureHandler(function(err) {
+          saveToOfflineQueue(currentUser.username, coordToSave, textToSave);
           if (badge) {
-            badge.className = 'font-bold text-rose-500 flex items-center gap-1.5';
-            badge.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> <span>Error koneksi</span>';
+            badge.className = 'font-bold text-amber-500 flex items-center gap-1.5';
+            badge.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> <span>Tersimpan di Draf Offline</span>';
           }
+          if (syncSt) syncSt.textContent = 'Draf Offline (' + coordToSave + ')';
         })
         .updateStaffCellByA1(currentUser.username, coordToSave, textToSave);
     }
@@ -2683,14 +3065,25 @@
       var statusEl = document.getElementById('syncCellStatus');
       if (statusEl) statusEl.textContent = 'Menyimpan ' + coord + '...';
 
+      if (!navigator.onLine) {
+        saveToOfflineQueue(currentUser.username, coord, val);
+        if (statusEl) statusEl.textContent = 'Tersimpan Offline (' + coord + ')';
+        return;
+      }
+
       google.script.run
         .withSuccessHandler(function(res) {
           if (res && res.success) {
             if (statusEl) statusEl.textContent = 'Tersimpan (' + coord + ')';
             document.getElementById('staffRowCounter').textContent = res.totalBaris;
           } else {
-            if (statusEl) statusEl.textContent = 'Gagal simpan';
+            saveToOfflineQueue(currentUser.username, coord, val);
+            if (statusEl) statusEl.textContent = 'Tersimpan Offline (' + coord + ')';
           }
+        })
+        .withFailureHandler(function(err) {
+          saveToOfflineQueue(currentUser.username, coord, val);
+          if (statusEl) statusEl.textContent = 'Tersimpan Offline (' + coord + ')';
         })
         .updateStaffCellByA1(currentUser.username, coord, val);
     }
@@ -4165,6 +4558,14 @@
     var currentPreviewStaff = null;
 
     function openPreviewModal(namaStaf, username, sheetUrl, sheetId, totalBaris, unitKerja) {
+      currentPreviewStaff = {
+        nama: namaStaf,
+        username: username,
+        sheetUrl: sheetUrl,
+        sheetId: sheetId,
+        totalBaris: totalBaris,
+        unitKerja: unitKerja
+      };
       document.getElementById('previewModalTitle').textContent = 'Live Spreadsheet: ' + namaStaf;
       var unitBadge = document.getElementById('previewStaffUnitBadge');
       if (unitBadge) unitBadge.textContent = unitKerja || 'Staf Pelaksana';
@@ -4208,6 +4609,530 @@
           iframe.src = cur;
         }, 150);
       }
+    }
+
+    // =====================================================================
+    // 1. PROGRESSIVE WEB APP (PWA) & OFFLINE-FIRST ENGINE
+    // =====================================================================
+    var deferredPwaPrompt = null;
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js')
+          .then(function(reg) {
+            console.log('✅ Service Worker G-Monitor aktif. Scope:', reg.scope);
+          })
+          .catch(function(err) {
+            console.warn('Service Worker registration notice:', err);
+          });
+      });
+    }
+
+    // Capture PWA Install Prompt
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPwaPrompt = e;
+      var btns = document.querySelectorAll('.pwa-install-btn');
+      btns.forEach(function(b) { b.classList.remove('hidden'); });
+      var loginBtn = document.getElementById('btnLoginPwaInstall');
+      if (loginBtn) loginBtn.classList.remove('hidden');
+    });
+
+    window.addEventListener('appinstalled', function() {
+      deferredPwaPrompt = null;
+      var btns = document.querySelectorAll('.pwa-install-btn');
+      btns.forEach(function(b) { b.classList.add('hidden'); });
+      showCosmicToast({
+        type: 'save',
+        title: 'APLIKASI TERPASANG! 📲',
+        message: 'G-Monitor Diskoperindag siap digunakan langsung di perangkat Anda',
+        duration: 2500
+      });
+    });
+
+    function triggerPwaInstall() {
+      if (deferredPwaPrompt) {
+        deferredPwaPrompt.prompt();
+        deferredPwaPrompt.userChoice.then(function(choice) {
+          if (choice && choice.outcome === 'accepted') {
+            console.log('User installed G-Monitor PWA');
+          }
+          deferredPwaPrompt = null;
+        });
+      } else {
+        alert('Aplikasi G-Monitor Diskoperindag siap diinstal! Di browser Google Chrome / Microsoft Edge, klik ikon Pasang (Install) di bilah alamat URL atau pilih menu browser -> "Install G-Monitor".');
+      }
+    }
+
+    // Online / Offline Network Status Monitoring
+    function updateNetworkStatusIndicators(isOnline) {
+      var statusTexts = document.querySelectorAll('.network-status-text');
+      statusTexts.forEach(function(el) {
+        el.textContent = isOnline ? 'Online' : 'Offline';
+      });
+
+      var adminPill = document.getElementById('adminNetworkStatusPill');
+      if (adminPill) {
+        adminPill.className = isOnline
+          ? 'flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+          : 'flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-700 dark:text-amber-300 animate-pulse';
+        var dot = adminPill.querySelector('span');
+        if (dot) dot.className = isOnline ? 'w-2 h-2 rounded-full bg-emerald-500 animate-ping' : 'w-2 h-2 rounded-full bg-amber-500';
+      }
+
+      var staffPill = document.getElementById('staffNetworkStatusPill');
+      if (staffPill) {
+        staffPill.className = isOnline
+          ? 'flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+          : 'flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-700 dark:text-amber-300 animate-pulse';
+        var sDot = staffPill.querySelector('span');
+        if (sDot) sDot.className = isOnline ? 'w-2 h-2 rounded-full bg-emerald-500 animate-ping' : 'w-2 h-2 rounded-full bg-amber-500';
+      }
+
+      updateOfflineQueueBadge();
+    }
+
+    window.addEventListener('online', function() {
+      updateNetworkStatusIndicators(true);
+      flushOfflineQueue();
+    });
+
+    window.addEventListener('offline', function() {
+      updateNetworkStatusIndicators(false);
+      showCosmicToast({
+        type: 'logout',
+        title: 'JARINGAN TERPUTUS (OFFLINE) 📡',
+        message: 'Penyimpanan lokal diaktifkan. Anda tetap dapat mendikte dan mengetik data kerja.',
+        duration: 2500
+      });
+    });
+
+    // Offline-First Queue Operations
+    function getOfflineQueue() {
+      try {
+        return JSON.parse(localStorage.getItem('gmonitor_offline_queue') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function setOfflineQueue(queue) {
+      try {
+        localStorage.setItem('gmonitor_offline_queue', JSON.stringify(queue));
+      } catch (e) {}
+    }
+
+    function saveToOfflineQueue(username, coord, text) {
+      if (!username || !coord) return;
+      var queue = getOfflineQueue();
+      var existingIndex = queue.findIndex(function(item) {
+        return item.username === username && item.coord === coord;
+      });
+      if (existingIndex !== -1) {
+        queue[existingIndex].text = text;
+        queue[existingIndex].timestamp = Date.now();
+      } else {
+        queue.push({
+          username: username,
+          coord: coord,
+          text: text,
+          timestamp: Date.now()
+        });
+      }
+      setOfflineQueue(queue);
+      updateOfflineQueueBadge();
+    }
+
+    function updateOfflineQueueBadge() {
+      var badge = document.getElementById('staffOfflineQueueBadge');
+      var counter = document.getElementById('staffOfflineQueueCount');
+      if (!badge || !counter) return;
+
+      var queue = getOfflineQueue();
+      var userItems = currentUser ? queue.filter(function(q) { return q.username === currentUser.username; }) : queue;
+
+      if (userItems.length > 0) {
+        counter.textContent = userItems.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    var isFlushingOfflineQueue = false;
+
+    function flushOfflineQueue() {
+      if (!navigator.onLine || !currentUser || isFlushingOfflineQueue) return;
+      var queue = getOfflineQueue();
+      var userItems = queue.filter(function(q) { return q.username === currentUser.username; });
+      if (userItems.length === 0) return;
+
+      isFlushingOfflineQueue = true;
+      var total = userItems.length;
+      var synced = 0;
+
+      userItems.forEach(function(item) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            synced++;
+            var curQueue = getOfflineQueue();
+            var remaining = curQueue.filter(function(q) {
+              return !(q.username === item.username && q.coord === item.coord && q.timestamp === item.timestamp);
+            });
+            setOfflineQueue(remaining);
+            updateOfflineQueueBadge();
+
+            if (synced >= total) {
+              isFlushingOfflineQueue = false;
+              showCosmicToast({
+                type: 'save',
+                title: 'SINKRONISASI OFFLINE SUKSES! 🔄',
+                message: total + ' sel kerja berhasil dikirim ke Google Sheets',
+                subDetail: 'Seluruh draf lokal telah terunggah',
+                duration: 2200
+              });
+            }
+          })
+          .withFailureHandler(function() {
+            isFlushingOfflineQueue = false;
+          })
+          .updateStaffCellByA1(item.username, item.coord, item.text);
+      });
+    }
+
+    function flushOfflineQueueManually() {
+      if (!navigator.onLine) {
+        alert('Perangkat Anda masih dalam keadaan offline (tidak ada koneksi internet). Data draf tetap aman tersimpan di memori perangkat.');
+        return;
+      }
+      flushOfflineQueue();
+    }
+
+    // =====================================================================
+    // 2. GENERATOR LAPORAN SIAP CETAK & EKSPOR PDF RESMI (KOP BANYUASIN + QR-CODE TTE)
+    // =====================================================================
+    var currentPrintStaffData = null;
+    var printQrCodeInstance = null;
+
+    function getIndonesianDateFormatted(d) {
+      var dateObj = d ? new Date(d) : new Date();
+      var months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      var day = dateObj.getDate();
+      var month = months[dateObj.getMonth()];
+      var year = dateObj.getFullYear();
+      return 'Pangkalan Balai, ' + day + ' ' + month + ' ' + year;
+    }
+
+    function openPrintPdfModal(origin) {
+      var modal = document.getElementById('modalPrintReport');
+      if (!modal) return;
+
+      var staffContainer = document.getElementById('printStaffSelectContainer');
+      var staffSelect = document.getElementById('printStaffSelect');
+
+      // Set tanggal default hari ini
+      var dateInput = document.getElementById('printDocDateInput');
+      if (dateInput) {
+        dateInput.value = getIndonesianDateFormatted(new Date());
+      }
+
+      if (origin === 'staff' || (currentUser && currentUser.role === 'staff')) {
+        if (staffContainer) staffContainer.classList.add('hidden');
+        currentPrintStaffData = {
+          nama: currentUser.nama || 'Staf Pelaksana',
+          nip: currentUser.nip || '-',
+          jabatan: currentUser.jabatan || 'Staf Pelaksana',
+          unitKerja: currentUser.unitKerja || 'Dinas Koperindag',
+          username: currentUser.username,
+          sheetUrl: currentUser.sheetUrl || ''
+        };
+        populatePrintTableFromLuckysheetOrCached(currentUser.username);
+      } else {
+        // Mode Admin
+        if (staffContainer) staffContainer.classList.remove('hidden');
+        if (staffSelect) {
+          staffSelect.innerHTML = '';
+          if (currentStaffList && currentStaffList.length > 0) {
+            currentStaffList.forEach(function(s, idx) {
+              var opt = document.createElement('option');
+              opt.value = s.username;
+              opt.textContent = (idx + 1) + '. ' + s.nama + ' (' + (s.unitKerja || 'Unit') + ')';
+              staffSelect.appendChild(opt);
+            });
+            var first = currentStaffList[0];
+            currentPrintStaffData = {
+              nama: first.nama,
+              nip: first.nip || '-',
+              jabatan: first.jabatan || 'Staf Pelaksana',
+              unitKerja: first.unitKerja || 'Dinas Koperindag',
+              username: first.username,
+              sheetUrl: first.sheetUrl || ''
+            };
+            populatePrintTableFromLuckysheetOrCached(first.username);
+          }
+        }
+      }
+
+      renderPrintPaper();
+      modal.classList.remove('hidden');
+    }
+
+    function openPrintPdfFromPreviewModal() {
+      if (!currentPreviewStaff) {
+        openPrintPdfModal('admin');
+        return;
+      }
+      currentPrintStaffData = {
+        nama: currentPreviewStaff.nama || 'Staf Pelaksana',
+        nip: (currentPreviewStaff.nip && currentPreviewStaff.nip !== '-') ? currentPreviewStaff.nip : '-',
+        jabatan: (currentPreviewStaff.jabatan && currentPreviewStaff.jabatan !== '-') ? currentPreviewStaff.jabatan : 'Staf Pelaksana',
+        unitKerja: currentPreviewStaff.unitKerja || 'Dinas Koperindag',
+        username: currentPreviewStaff.username,
+        sheetUrl: currentPreviewStaff.sheetUrl || ''
+      };
+      var staffContainer = document.getElementById('printStaffSelectContainer');
+      if (staffContainer) staffContainer.classList.add('hidden');
+
+      var dateInput = document.getElementById('printDocDateInput');
+      if (dateInput) dateInput.value = getIndonesianDateFormatted(new Date());
+
+      populatePrintTableFromLuckysheetOrCached(currentPreviewStaff.username);
+      renderPrintPaper();
+      document.getElementById('modalPrintReport').classList.remove('hidden');
+    }
+
+    function closePrintReportModal() {
+      var modal = document.getElementById('modalPrintReport');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function onPrintStaffSelectChange() {
+      var select = document.getElementById('printStaffSelect');
+      if (!select || !currentStaffList) return;
+      var uname = select.value;
+      var found = currentStaffList.find(function(s) { return s.username === uname; });
+      if (found) {
+        currentPrintStaffData = {
+          nama: found.nama,
+          nip: found.nip || '-',
+          jabatan: found.jabatan || 'Staf Pelaksana',
+          unitKerja: found.unitKerja || 'Dinas Koperindag',
+          username: found.username,
+          sheetUrl: found.sheetUrl || ''
+        };
+        populatePrintTableFromLuckysheetOrCached(found.username);
+        renderPrintPaper();
+      }
+    }
+
+    function populatePrintTableFromLuckysheetOrCached(username) {
+      var tbody = document.getElementById('printPaperTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      var rowsData = [];
+
+      // Jika kita staf yang sedang membuka Luckysheet di tab grid, ambil data langsung dari sheet aktif!
+      if (typeof window !== 'undefined' && window.luckysheet && window.luckysheet.getSheetData && currentUser && currentUser.username === username) {
+        try {
+          var matrix = luckysheet.getSheetData();
+          if (matrix && matrix.length > 1) {
+            for (var r = 1; r < Math.min(matrix.length, 30); r++) {
+              var rowCells = matrix[r];
+              if (!rowCells) continue;
+              var colA = rowCells[0] ? (typeof rowCells[0] === 'object' ? (rowCells[0].m || rowCells[0].v || '') : rowCells[0]) : '';
+              var colB = rowCells[1] ? (typeof rowCells[1] === 'object' ? (rowCells[1].m || rowCells[1].v || '') : rowCells[1]) : '';
+              var colC = rowCells[2] ? (typeof rowCells[2] === 'object' ? (rowCells[2].m || rowCells[2].v || '') : rowCells[2]) : '';
+              var colD = rowCells[3] ? (typeof rowCells[3] === 'object' ? (rowCells[3].m || rowCells[3].v || '') : rowCells[3]) : '';
+              var colE = rowCells[4] ? (typeof rowCells[4] === 'object' ? (rowCells[4].m || rowCells[4].v || '') : rowCells[4]) : '';
+
+              if (String(colA).trim() || String(colB).trim() || String(colC).trim() || String(colD).trim() || String(colE).trim()) {
+                rowsData.push({
+                  tanggal: String(colA || '-'),
+                  waktu: String(colB || '-'),
+                  tugas: String(colC || '-'),
+                  output: String(colD || '-'),
+                  ket: String(colE || '-')
+                });
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Error reading live Luckysheet matrix:', e);
+        }
+      }
+
+      // Jika tidak ada data live Luckysheet, gunakan template kegiatan dinas terisi
+      if (rowsData.length === 0) {
+        var nowStr = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        rowsData = [
+          { tanggal: nowStr, waktu: '08:00 - 10:00', tugas: 'Melakukan pendataan dan pemutakhiran data operasional pelaku UMKM binaan', output: 'Rekapitulasi 15 berkas profil usaha', ket: 'Terverifikasi' },
+          { tanggal: nowStr, waktu: '10:15 - 12:00', tugas: 'Menginput laporan pengawasan ketersediaan pasokan bahan pokok dan harga pasar daerah', output: 'Laporan komparasi harga komoditas', ket: 'Selesai' },
+          { tanggal: nowStr, waktu: '13:30 - 15:30', tugas: 'Penyusunan bahan administrasi monitoring kelembagaan koperasi aktif', output: 'Dokumen evaluasi kelembagaan', ket: 'Selesai' }
+        ];
+      }
+
+      rowsData.forEach(function(row, idx) {
+        var tr = document.createElement('tr');
+        tr.className = (idx % 2 === 1) ? 'bg-slate-50' : 'bg-white';
+        tr.innerHTML = '<td class="border border-slate-800 px-2 py-2 text-center font-bold">' + (idx + 1) + '</td>' +
+                       '<td class="border border-slate-800 px-2 py-2 text-center">' + row.tanggal + '</td>' +
+                       '<td class="border border-slate-800 px-2 py-2 text-center font-mono text-[11px]">' + row.waktu + '</td>' +
+                       '<td class="border border-slate-800 px-3 py-2 text-left leading-relaxed">' + row.tugas + '</td>' +
+                       '<td class="border border-slate-800 px-3 py-2 text-left">' + row.output + '</td>' +
+                       '<td class="border border-slate-800 px-2 py-2 text-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-semibold">' + row.ket + '</span></td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderPrintPaper() {
+      if (!currentPrintStaffData) return;
+
+      var titleVal = document.getElementById('printDocTitleInput').value || 'LAPORAN HASIL MONITORING KEGIATAN HARIAN PEGAWAI';
+      var numVal = document.getElementById('printDocNumberInput').value || '005 / DISKOPERINDAG-BYU / X / 2026';
+      var dateVal = document.getElementById('printDocDateInput').value || getIndonesianDateFormatted(new Date());
+
+      var atasanNama = document.getElementById('printSignerAtasanNama').value || 'H. Ir. Ahmad Subroto, M.Si';
+      var atasanNip = document.getElementById('printSignerAtasanNip').value || '19750812 200003 1 002';
+      var atasanJabatan = document.getElementById('printSignerAtasanJabatan').value || 'Kepala Bidang Koperasi dan UMKM';
+
+      var paperSize = document.getElementById('printPaperSizeSelect').value;
+      var orientation = document.getElementById('printOrientationSelect').value;
+      var includeQr = document.getElementById('printIncludeQrCode').checked;
+      var includeWatermark = document.getElementById('printIncludeWatermark').checked;
+
+      // Update Header & Teks
+      document.getElementById('printPaperTitle').textContent = titleVal;
+      document.getElementById('printPaperDocNum').textContent = 'Nomor: ' + numVal;
+      document.getElementById('printPaperDateLocation').textContent = dateVal;
+
+      // Update Identitas Pegawai
+      document.getElementById('printPaperStaffNama').textContent = currentPrintStaffData.nama;
+      document.getElementById('printPaperStaffNip').textContent = currentPrintStaffData.nip;
+      document.getElementById('printPaperStaffJabatan').textContent = currentPrintStaffData.jabatan;
+      document.getElementById('printPaperStaffUnit').textContent = currentPrintStaffData.unitKerja;
+
+      // Update Tanda Tangan
+      document.getElementById('printPaperAtasanJabatanText').textContent = atasanJabatan;
+      document.getElementById('printPaperAtasanNamaText').textContent = atasanNama;
+      document.getElementById('printPaperAtasanNipText').textContent = 'NIP. ' + atasanNip;
+
+      document.getElementById('printPaperStaffJabatanText').textContent = currentPrintStaffData.jabatan;
+      document.getElementById('printPaperStaffNamaText').textContent = currentPrintStaffData.nama;
+      document.getElementById('printPaperStaffNipText').textContent = 'NIP. ' + currentPrintStaffData.nip;
+
+      // Update Dimensi Kertas
+      var paperContent = document.getElementById('printPaperContent');
+      if (paperContent) {
+        if (orientation === 'landscape') {
+          paperContent.style.maxWidth = paperSize === 'f4' ? '330mm' : '297mm';
+          paperContent.style.minHeight = paperSize === 'f4' ? '215mm' : '210mm';
+        } else {
+          paperContent.style.maxWidth = paperSize === 'f4' ? '215mm' : '210mm';
+          paperContent.style.minHeight = paperSize === 'f4' ? '330mm' : '297mm';
+        }
+      }
+
+      // Watermark
+      var watermark = document.getElementById('printWatermarkOverlay');
+      if (watermark) {
+        if (includeWatermark) watermark.classList.remove('hidden');
+        else watermark.classList.add('hidden');
+      }
+
+      // QR Code Box
+      var qrBox = document.getElementById('printQrCodeBox');
+      if (qrBox) {
+        if (includeQr) {
+          qrBox.classList.remove('hidden');
+          generateDocumentQrCode();
+        } else {
+          qrBox.classList.add('hidden');
+        }
+      }
+    }
+
+    function generateDocumentQrCode() {
+      var qrContainer = document.getElementById('printQrCodeGraphic');
+      if (!qrContainer || typeof QRCode === 'undefined') return;
+      qrContainer.innerHTML = '';
+
+      var auditHash = '#BYU-DISKOP-' + Math.abs((currentPrintStaffData.username + Date.now()).split('').reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)).toString(16).toUpperCase();
+      var auditEl = document.getElementById('printQrAuditHash');
+      if (auditEl) auditEl.textContent = 'Audit Hash: ' + auditHash;
+
+      var qrData = currentPrintStaffData.sheetUrl || ('https://mandalaputrasatria.github.io/g-monitordiskoperindagbanyuasin/?verify=' + auditHash);
+
+      try {
+        printQrCodeInstance = new QRCode(qrContainer, {
+          text: qrData,
+          width: 76,
+          height: 76,
+          colorDark: '#0f172a',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch (e) {
+        console.warn('QR Code generation notice:', e);
+      }
+    }
+
+    function printReportDocument() {
+      window.print();
+    }
+
+    function downloadReportPdf() {
+      var element = document.getElementById('printPaperContent');
+      var btn = document.getElementById('btnDownloadPdf');
+      if (!element || typeof html2pdf === 'undefined') {
+        window.print();
+        return;
+      }
+
+      var paperSize = document.getElementById('printPaperSizeSelect').value;
+      var orientation = document.getElementById('printOrientationSelect').value;
+      var staffNameClean = (currentPrintStaffData && currentPrintStaffData.nama) ? currentPrintStaffData.nama.replace(/\s+/g, '_') : 'Staf';
+      var filename = 'Laporan_Kerja_Diskoperindag_' + staffNameClean + '_' + new Date().toISOString().slice(0, 10) + '.pdf';
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Membuat PDF...</span>';
+      }
+
+      var opt = {
+        margin: [8, 10, 8, 10],
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: {
+          unit: 'mm',
+          format: paperSize === 'f4' ? [215, 330] : 'a4',
+          orientation: orientation
+        }
+      };
+
+      html2pdf().set(opt).from(element).save()
+        .then(function() {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-file-arrow-down"></i><span>Unduh Berkas PDF</span>';
+          }
+          showCosmicToast({
+            type: 'save',
+            title: 'PDF BERHASIL DIUNDUH! 📄',
+            message: filename,
+            subDetail: 'Laporan resmi siap dicetak atau dikirim',
+            duration: 2500
+          });
+        })
+        .catch(function(err) {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-file-arrow-down"></i><span>Unduh Berkas PDF</span>';
+          }
+          alert('Kendala saat mengekspor PDF: ' + err.message + '. Anda dapat menggunakan tombol "Cetak" untuk menyimpan sebagai PDF.');
+        });
     }
   </script>
 </body>

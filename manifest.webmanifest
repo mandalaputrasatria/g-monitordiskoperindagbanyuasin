@@ -1,0 +1,66 @@
+{
+  "name": "G-Monitor Diskoperindag Banyuasin - Smart Workspace",
+  "short_name": "G-Monitor",
+  "description": "Sistem Manajemen Dokumen, Asisten Dikte Suara Pintar & Arsip Digital Terpadu Diskoperindag Kabupaten Banyuasin",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#1e1b4b",
+  "categories": ["productivity", "business", "utilities", "government"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Lembar Kerja Staf",
+      "short_name": "Lembar Kerja",
+      "description": "Buka lembar spreadsheet kerja dan asisten suara",
+      "url": "./index.html?view=workspace",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard Admin",
+      "short_name": "Admin",
+      "description": "Pantau aktivitas kerja dan kelola staf dinas",
+      "url": "./index.html?view=admin",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

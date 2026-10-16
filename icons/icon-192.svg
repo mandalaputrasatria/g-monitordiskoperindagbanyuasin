@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3.84" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="192" height="192" rx="42.24" fill="url(#bgGrad)"/>
+  
+  <!-- Outer Glow Ring -->
+  <circle cx="96" cy="96" r="80.64" stroke="url(#primaryGrad)" stroke-width="2.88" stroke-dasharray="7.68 3.84" opacity="0.6"/>
+  <circle cx="96" cy="96" r="72.96000000000001" stroke="url(#goldGrad)" stroke-width="1.536" opacity="0.4"/>
+
+  <!-- Center Hexagon / Shield -->
+  <g transform="translate(38.400000000000006, 38.400000000000006) scale(0.6)">
+    <!-- Monitor Base & Screen -->
+    <rect x="19.200000000000003" y="19.200000000000003" width="153.60000000000002" height="99.84" rx="11.52" fill="#1e293b" stroke="url(#primaryGrad)" stroke-width="4.800000000000001" filter="url(#glow)"/>
+    
+    <!-- Screen Inner -->
+    <rect x="26.880000000000003" y="26.880000000000003" width="138.24" height="84.48" rx="7.68" fill="#0f172a"/>
+    
+    <!-- Sound Waves / Spreadsheet grid simulation -->
+    <line x1="42.24" y1="69.12" x2="42.24" y2="46.08" stroke="#10b981" stroke-width="4.800000000000001" stroke-linecap="round"/>
+    <line x1="57.599999999999994" y1="80.64" x2="57.599999999999994" y2="34.56" stroke="#38bdf8" stroke-width="4.800000000000001" stroke-linecap="round"/>
+    <line x1="72.96000000000001" y1="92.16" x2="72.96000000000001" y2="53.760000000000005" stroke="#6366f1" stroke-width="4.800000000000001" stroke-linecap="round"/>
+    <line x1="88.32000000000001" y1="76.80000000000001" x2="88.32000000000001" y2="38.400000000000006" stroke="#a855f7" stroke-width="4.800000000000001" stroke-linecap="round"/>
+    
+    <!-- Bold 'G' Logo on Right Screen -->
+    <path d="M 138.24 46.08 
+             A 23.04 23.04 0 1 0 138.24 84.48 
+             L 138.24 65.28 
+             L 119.03999999999999 65.28" 
+          fill="none" stroke="url(#goldGrad)" stroke-width="5.76" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Monitor Stand -->
+    <polygon points="80.64,119.03999999999999 111.35999999999999,119.03999999999999 122.88,149.76 69.12,149.76" fill="#334155"/>
+    <rect x="53.760000000000005" y="145.92000000000002" width="84.48" height="9.600000000000001" rx="3.84" fill="url(#primaryGrad)"/>
+    
+    <!-- Laurel Leaves (Bottom Left & Right) -->
+    <path d="M 23.04 149.76 C 34.56 172.8, 69.12 176.64000000000001, 96 176.64000000000001" fill="none" stroke="url(#goldGrad)" stroke-width="2.88" stroke-linecap="round"/>
+    <path d="M 168.96 149.76 C 157.44 172.8, 122.88 176.64000000000001, 96 176.64000000000001" fill="none" stroke="url(#goldGrad)" stroke-width="2.88" stroke-linecap="round"/>
+  </g>
+
+  <!-- Typography Badge -->
+  <text x="50%" y="167.04" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="12.48" fill="#ffffff" text-anchor="middle" letter-spacing="0.96">G-MONITOR</text>
+  <text x="50%" y="178.56" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="7.295999999999999" fill="#eab308" text-anchor="middle" letter-spacing="1.536">DISKOPERINDAG BANYUASIN</text>
+</svg>

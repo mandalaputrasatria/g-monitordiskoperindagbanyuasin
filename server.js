@@ -65,6 +65,16 @@ async function forwardToGoogleAppsScript(functionName, args) {
 // Serve static assets from public/ (tanpa index default agar GET / melayani Index.html asli)
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
+// Serve PWA assets (manifest, Service Worker, and icons)
+app.get('/manifest.webmanifest', (req, res) => {
+  res.sendFile(path.join(__dirname, 'manifest.webmanifest'));
+});
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(__dirname, 'sw.js'));
+});
+app.use('/icons', express.static(path.join(__dirname, 'icons')));
+
 // Database Helpers
 function readDB() {
   try {

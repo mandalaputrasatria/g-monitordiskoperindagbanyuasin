@@ -70,6 +70,18 @@
 - Integrasi API jadwal sholat resmi Kemenag / Aladhan berdasarkan koordinat lintang-bujur Kabupaten Banyuasin.
 - Notifikasi floating banner waktu sholat dan **otomatis menjeda (pause) mikrofon dikte** saat adzan berkumandang.
 
+### 8. 📱 Progressive Web App (PWA) & Mode Dikte Offline-First
+- **Aplikasi Terinstal Mandiri**: Dapat dipasang (*Install App*) langsung ke Windows Desktop, macOS, maupun smartphone Android/iOS dengan ikon resmi Diskoperindag Banyuasin.
+- **Service Worker (`sw.js`) & Caching Cerdas**: Aplikasi dapat dibuka dan digunakan dengan cepat tanpa internet, bebas galat "No Internet".
+- **Antrean Dikte Offline (*Offline Queue*)**: Ketika koneksi WiFi atau internet kantor sedang terputus, staf tetap dapat mendikte dan mengetik data kerja. Seluruh perubahan disimpan secara aman di memori lokal perangkat (`localStorage`).
+- **Sinkronisasi Otomatis (*Auto-Sync*)**: Begitu internet kembali online, sistem secara otomatis mengunggah seluruh draf sel ke Google Sheets dan memunculkan konfirmasi *Cosmic Pulse Toast*.
+
+### 9. 📄 Generator Laporan Cetak & Ekspor PDF Resmi (KOP Pemkab Banyuasin + QR-Code TTE)
+- **KOP Surat Resmi Standar Naskah Dinas**: Dilengkapi lambang resmi Kabupaten Banyuasin, tipografi naskah dinas baku, dan garis ganda tebal-tipis (*double border*).
+- **Simulasi Kertas Presisi (A4 & F4 / Folio)**: Pratinjau interaktif real-time dengan pilihan orientasi Potret maupun Lanskap.
+- **Validasi Elektronik QR-Code (TTE)**: Menghasilkan kode QR tajam di sudut bawah dokumen yang merekam tautan berkas arsip resmi Google Drive dan hash audit integritas naskah.
+- **Ekspor Multi-Format**: Cetak langsung (*Ctrl+P / Direct Print*) dengan layout bersih otomatis tanpa elemen UI, serta unduh file PDF beresolusi tinggi (300 DPI) via `html2pdf.js`.
+
 ---
 
 ## 🛠️ Arsitektur & Teknologi
@@ -144,13 +156,18 @@ Proyek ini telah dikonfigurasi dengan Google Clasp sehingga sinkronisasi kode ke
 ├── .clasp.json          # Konfigurasi Script ID Google Apps Script
 ├── .claspignore        # Daftar file yang diabaikan saat push ke GAS
 ├── .gitignore           # Daftar file yang diabaikan oleh Git
+├── .nojekyll            # Bypass pemrosesan Jekyll di GitHub Pages
+├── 404.html             # Smart redirector rute tidak dikenal di GitHub Pages
 ├── appsscript.json      # Manifest konfigurasi runtime Google Apps Script
 ├── Code.gs              # Backend server Google Apps Script (Database & Drive Handler)
 ├── config.json          # Konfigurasi proxy lokal server & endpoint Web App
-├── index.html           # Frontend SPA (UI, Luckysheet, Visualizer, Cosmic Toast)
+├── icons/               # Ikon resmi Progressive Web App (PNG & SVG)
+├── index.html           # Frontend SPA (UI, Luckysheet, Visualizer, PWA, PDF Generator)
+├── manifest.webmanifest # Manifest PWA untuk instalasi desktop & mobile
 ├── package.json         # Konfigurasi paket Node.js
 ├── README.md            # Dokumentasi utama proyek
-└── server.js            # Node.js Express local proxy server
+├── server.js            # Node.js Express local proxy server
+└── sw.js                # Service Worker PWA (Offline caching & background sync)
 ```
 
 ---
