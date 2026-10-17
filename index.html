@@ -385,99 +385,288 @@
       will-change: transform;
     }
 
-    @keyframes rotateNeonConic {
+    /* =====================================================================
+       ✨ REVISI CARD LOGIN GOOGLE GEMINI NEON & RHYTHMIC BREATHING MIST
+       1. Ultra-sheer glassmorphism (10% opacity) + backdrop-filter: blur(8px)
+       2. Border neon animasi Google Gemini (rotasi dinamis: cyan, deep purple, magenta)
+       3. Lapisan aura asap/mist di belakang border yang mengembang keluar
+       4. Jeda ritmik 7 detik: jeda tenang -> dihembuskan keluar membesar -> buyar perlahan
+       5. Kontras teks & input field tinggi dengan shadow halus nyaman dibaca
+       ===================================================================== */
+
+    /* Rotasi Dinamis Gradien Neon Google Gemini (Cyan, Deep Purple, Magenta) */
+    @keyframes rotateGeminiNeon {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
 
-    /* Poin 3: Bingkai Garis Tepi (Border) Kotak Berwarna Neon Pelangi Menyala */
-    .neon-border-wrapper {
+    .gemini-neon-border-wrapper {
       position: relative;
       border-radius: 28px;
-      padding: 2px;
-      overflow: visible !important; /* Memungkinkan asap rokok menyebar bebas 1 cm ke luar */
+      padding: 2.5px;
+      overflow: visible !important; /* Memungkinkan asap mengembang keluar kotak bebas */
       isolation: isolate;
-      box-shadow: 0 0 16px rgba(6, 182, 212, 0.55), 0 0 32px rgba(139, 92, 246, 0.35), 0 20px 50px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 25px rgba(0, 242, 254, 0.4), 0 0 45px rgba(121, 40, 202, 0.35), 0 20px 60px rgba(0, 0, 0, 0.6);
+      will-change: transform;
+    }
+
+    /* Jalur Klip Border Neon Berputar Persis Sesuai Lengkung Sudut 28px */
+    .gemini-border-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 28px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Rotator Gradien Warna Google Gemini */
+    .gemini-border-rotator {
+      position: absolute;
+      top: -65%;
+      left: -65%;
+      width: 230%;
+      height: 230%;
       background: conic-gradient(
-        from 0deg,
-        #06b6d4 0%,
-        #3b82f6 16%,
-        #8b5cf6 33%,
-        #ec4899 50%,
-        #f59e0b 66%,
-        #10b981 83%,
-        #06b6d4 100%
+        from 0deg at 50% 50%,
+        #00f2fe 0deg,
+        #3b82f6 50deg,
+        #4f46e5 100deg,
+        #7928ca 160deg,
+        #d946ef 230deg,
+        #ff007f 290deg,
+        #00f2fe 360deg
       );
+      animation: rotateGeminiNeon 5.5s linear infinite;
+      filter: saturate(160%) brightness(1.2);
     }
 
-    /* Pendaran Cahaya Ambient & Asap Kabut Rokok Melayang Menyebar Keluar 1 cm (~38px) */
-    @keyframes cigaretteSmokeDriftTop {
-      0%, 100% { transform: translateY(-6px) scale(0.95); opacity: 0.40; }
-      50% { transform: translateY(-38px) scale(1.35) rotate(4deg); opacity: 0.85; } /* Melayang 1 cm (38px) ke atas */
-    }
-    @keyframes cigaretteSmokeDriftBottom {
-      0%, 100% { transform: translateY(6px) scale(0.95); opacity: 0.40; }
-      50% { transform: translateY(38px) scale(1.35) rotate(-4deg); opacity: 0.85; } /* Melayang 1 cm (38px) ke bawah */
-    }
-    @keyframes cigaretteSmokeDriftLeft {
-      0%, 100% { transform: translateX(-6px) scale(0.95); opacity: 0.40; }
-      50% { transform: translateX(-38px) scale(1.35) rotate(-5deg); opacity: 0.85; } /* Melayang 1 cm (38px) ke kiri */
-    }
-    @keyframes cigaretteSmokeDriftRight {
-      0%, 100% { transform: translateX(6px) scale(0.95); opacity: 0.40; }
-      50% { transform: translateX(38px) scale(1.35) rotate(5deg); opacity: 0.85; } /* Melayang 1 cm (38px) ke kanan */
+    /* =====================================================================
+       RITME NAFAS ASAP / MIST GEMINI (SIKLUS 7 DETIK BERKALA)
+       Fase Inhale (0% - 28%): Jeda tenang seolah dihisap (asap rapat ke border, tipis)
+       Fase Exhale (28% - 58%): Dihembuskan keluar (gumpalan asap membesar keluar kotak ~46px)
+       Fase Disperse (58% - 85%): Buyar perlahan (kabut menyebar luas, menipis & menguap)
+       Fase Reset (85% - 100%): Relaksasi tenang kembali ke garis border
+       ===================================================================== */
+    @keyframes geminiSmokeTopRhythm {
+      0%, 25% {
+        transform: translateY(0px) scaleX(0.92) scaleY(0.85);
+        opacity: 0.20;
+        filter: blur(14px);
+      }
+      52% {
+        transform: translateY(-46px) scaleX(1.35) scaleY(1.45);
+        opacity: 0.92;
+        filter: blur(22px);
+      }
+      78% {
+        transform: translateY(-62px) scaleX(1.52) scaleY(1.65);
+        opacity: 0.22;
+        filter: blur(38px);
+      }
+      100% {
+        transform: translateY(0px) scaleX(0.92) scaleY(0.85);
+        opacity: 0.20;
+        filter: blur(14px);
+      }
     }
 
-    .smoke-tendril {
+    @keyframes geminiSmokeBottomRhythm {
+      0%, 25% {
+        transform: translateY(0px) scaleX(0.92) scaleY(0.85);
+        opacity: 0.20;
+        filter: blur(14px);
+      }
+      52% {
+        transform: translateY(46px) scaleX(1.35) scaleY(1.45);
+        opacity: 0.92;
+        filter: blur(22px);
+      }
+      78% {
+        transform: translateY(62px) scaleX(1.52) scaleY(1.65);
+        opacity: 0.22;
+        filter: blur(38px);
+      }
+      100% {
+        transform: translateY(0px) scaleX(0.92) scaleY(0.85);
+        opacity: 0.20;
+        filter: blur(14px);
+      }
+    }
+
+    @keyframes geminiSmokeLeftRhythm {
+      0%, 25% {
+        transform: translateX(0px) scaleX(0.85) scaleY(0.92);
+        opacity: 0.20;
+        filter: blur(14px);
+      }
+      52% {
+        transform: translateX(-46px) scaleX(1.45) scaleY(1.35);
+        opacity: 0.92;
+        filter: blur(22px);
+      }
+      78% {
+        transform: translateX(-62px) scaleX(1.65) scaleY(1.52);
+        opacity: 0.22;
+        filter: blur(38px);
+      }
+      100% {
+        transform: translateX(0px) scaleX(0.85) scaleY(0.92);
+        opacity: 0.20;
+        filter: blur(14px);
+      }
+    }
+
+    @keyframes geminiSmokeRightRhythm {
+      0%, 25% {
+        transform: translateX(0px) scaleX(0.85) scaleY(0.92);
+        opacity: 0.20;
+        filter: blur(14px);
+      }
+      52% {
+        transform: translateX(46px) scaleX(1.45) scaleY(1.35);
+        opacity: 0.92;
+        filter: blur(22px);
+      }
+      78% {
+        transform: translateX(62px) scaleX(1.65) scaleY(1.52);
+        opacity: 0.22;
+        filter: blur(38px);
+      }
+      100% {
+        transform: translateX(0px) scaleX(0.85) scaleY(0.92);
+        opacity: 0.20;
+        filter: blur(14px);
+      }
+    }
+
+    @keyframes geminiSmokeAmbientRhythm {
+      0%, 25% {
+        transform: scale(0.96);
+        opacity: 0.22;
+        filter: blur(20px);
+      }
+      52% {
+        transform: scale(1.18);
+        opacity: 0.85;
+        filter: blur(36px);
+      }
+      78% {
+        transform: scale(1.28);
+        opacity: 0.18;
+        filter: blur(50px);
+      }
+      100% {
+        transform: scale(0.96);
+        opacity: 0.22;
+        filter: blur(20px);
+      }
+    }
+
+    .gemini-smoke-cloud {
       position: absolute;
       pointer-events: none;
       border-radius: 50%;
-      filter: blur(18px);
       mix-blend-mode: screen;
-      z-index: 1;
-    }
-    .smoke-tendril-top {
-      top: -18px;
-      left: 15%;
-      width: 70%;
-      height: 48px;
-      background: radial-gradient(ellipse at center, rgba(6, 182, 212, 0.7) 0%, rgba(59, 130, 246, 0.35) 45%, transparent 75%);
-      animation: cigaretteSmokeDriftTop 6.2s ease-in-out infinite;
-    }
-    .smoke-tendril-bottom {
-      bottom: -18px;
-      left: 15%;
-      width: 70%;
-      height: 48px;
-      background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.65) 0%, rgba(245, 158, 11, 0.35) 45%, transparent 75%);
-      animation: cigaretteSmokeDriftBottom 6.8s ease-in-out infinite;
-    }
-    .smoke-tendril-left {
-      left: -18px;
-      top: 15%;
-      width: 48px;
-      height: 70%;
-      background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.7) 0%, rgba(6, 182, 212, 0.35) 45%, transparent 75%);
-      animation: cigaretteSmokeDriftLeft 6.5s ease-in-out infinite;
-    }
-    .smoke-tendril-right {
-      right: -18px;
-      top: 15%;
-      width: 48px;
-      height: 70%;
-      background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.7) 0%, rgba(245, 158, 11, 0.35) 45%, transparent 75%);
-      animation: cigaretteSmokeDriftRight 7.0s ease-in-out infinite;
+      z-index: 0;
     }
 
-    /* Poin 3: Kotak Gelap 10% Transparan Ultra Jernih (Tanpa Blok Hitam Tebal) */
+    /* Cyan mist di sisi atas */
+    .gemini-smoke-top {
+      top: -24px;
+      left: 10%;
+      width: 80%;
+      height: 56px;
+      background: radial-gradient(ellipse at center, rgba(0, 242, 254, 0.85) 0%, rgba(79, 70, 229, 0.45) 50%, transparent 75%);
+      animation: geminiSmokeTopRhythm 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    /* Magenta mist di sisi bawah */
+    .gemini-smoke-bottom {
+      bottom: -24px;
+      left: 10%;
+      width: 80%;
+      height: 56px;
+      background: radial-gradient(ellipse at center, rgba(255, 0, 127, 0.85) 0%, rgba(217, 70, 239, 0.45) 50%, transparent 75%);
+      animation: geminiSmokeBottomRhythm 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    /* Deep Purple mist di sisi kiri */
+    .gemini-smoke-left {
+      left: -24px;
+      top: 10%;
+      width: 56px;
+      height: 80%;
+      background: radial-gradient(ellipse at center, rgba(121, 40, 202, 0.88) 0%, rgba(0, 242, 254, 0.45) 50%, transparent 75%);
+      animation: geminiSmokeLeftRhythm 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    /* Magenta-Cyan fusion mist di sisi kanan */
+    .gemini-smoke-right {
+      right: -24px;
+      top: 10%;
+      width: 56px;
+      height: 80%;
+      background: radial-gradient(ellipse at center, rgba(217, 70, 239, 0.88) 0%, rgba(0, 242, 254, 0.45) 50%, transparent 75%);
+      animation: geminiSmokeRightRhythm 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    /* Ambient mist menyeluruh di belakang kartu */
+    .gemini-smoke-ambient {
+      inset: -15px;
+      border-radius: 40px;
+      background: radial-gradient(circle at 30% 20%, rgba(0, 242, 254, 0.45) 0%, rgba(121, 40, 202, 0.38) 45%, rgba(255, 0, 127, 0.32) 70%, transparent 90%);
+      animation: geminiSmokeAmbientRhythm 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    /* Poin 1: Ultra-sheer glassmorphism (10% opacity) & backdrop-filter: blur(8px) */
     .dark-translucent-box {
-      background-color: rgba(8, 14, 28, 0.10) !important; /* 10% transparan mewah */
-      backdrop-filter: blur(18px) saturate(190%) !important;
-      -webkit-backdrop-filter: blur(18px) saturate(190%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      background-color: rgba(10, 16, 32, 0.10) !important; /* Transparansi ~10% ultra jernih */
+      backdrop-filter: blur(8px) saturate(180%) !important; /* Tepat 8px blur sesuai permintaan user */
+      -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.16) !important;
       border-radius: 26px;
       position: relative;
       z-index: 2;
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.18), inset 0 -1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Poin 5: Kontras & Shadow Halus pada Teks & Input Field */
+    .glass-contrast-title {
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 0.7) !important;
+    }
+    .glass-contrast-sub {
+      color: #f1f5f9 !important;
+      font-weight: 500 !important;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.6) !important;
+    }
+    .glass-contrast-label {
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.04em !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.7) !important;
+    }
+    .glass-contrast-input {
+      background-color: rgba(8, 14, 28, 0.65) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.30) !important;
+      color: #ffffff !important;
+      font-weight: 500 !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+    }
+    .glass-contrast-input:focus {
+      background-color: rgba(8, 14, 28, 0.88) !important;
+      border-color: #00f2fe !important;
+      box-shadow: 0 0 18px rgba(0, 242, 254, 0.5), inset 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+    }
+    .glass-contrast-footer {
+      color: #e2e8f0 !important;
+      font-weight: 500 !important;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95) !important;
     }
 
     /* Animasi Teks Kaligrafi Melayang (Imsak & Terbit) */
@@ -832,73 +1021,100 @@
             <span>Personalisasi Atmosfer</span>
             <span class="text-cyan-400 font-mono">Live FX</span>
           </div>
-          <button type="button" onclick="selectWeatherMode('auto')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition">
+          <button type="button" onclick="selectWeatherMode('auto')" data-mode="auto" class="w-full text-left px-3.5 py-2 hover:bg-white/15 rounded-xl flex items-center gap-2.5 transition cursor-pointer">
             <i class="fa-solid fa-clock-rotate-left text-cyan-400 w-4 text-center"></i>
             <div>
-              <div class="font-semibold text-white">🌐 Otomatis (Waktu Nyata)</div>
+              <div class="font-semibold text-white">🌐 Otomatis (Default Sistem)</div>
               <div class="text-[10px] text-slate-400">Pagi, siang, sore, malam, imsak, terbit</div>
             </div>
+            <span class="active-badge hidden ml-auto text-[10px] bg-cyan-400 text-slate-950 font-bold px-2 py-0.5 rounded-full shadow-sm">
+              <i class="fa-solid fa-check mr-0.5"></i> Aktif
+            </span>
           </button>
           
           <!-- EFEK WAKTU IMSAK (BASMALAH MELAYANG) -->
-          <button type="button" onclick="selectWeatherMode('imsak')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition bg-indigo-500/10 border-l-2 border-indigo-400">
+          <button type="button" onclick="selectWeatherMode('imsak')" data-mode="imsak" class="w-full text-left px-3.5 py-2 hover:bg-white/15 rounded-xl flex items-center gap-2.5 transition bg-indigo-500/10 border-l-2 border-indigo-400 cursor-pointer">
             <i class="fa-solid fa-star-and-crescent text-cyan-300 w-4 text-center"></i>
             <div>
               <div class="font-semibold text-cyan-200">🌙 Waktu Imsak (Basmalah Melayang)</div>
               <div class="text-[10px] text-slate-300">Kaligrafi Basmalah, latin & artinya melayang</div>
             </div>
+            <span class="active-badge hidden ml-auto text-[10px] bg-cyan-400 text-slate-950 font-bold px-2 py-0.5 rounded-full shadow-sm">
+              <i class="fa-solid fa-check mr-0.5"></i> Aktif
+            </span>
           </button>
 
           <!-- EFEK WAKTU TERBIT (DOA KELUAR RUMAH & KERJA MELAYANG) -->
-          <button type="button" onclick="selectWeatherMode('terbit')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition bg-amber-500/10 border-l-2 border-amber-400">
+          <button type="button" onclick="selectWeatherMode('terbit')" data-mode="terbit" class="w-full text-left px-3.5 py-2 hover:bg-white/15 rounded-xl flex items-center gap-2.5 transition bg-amber-500/10 border-l-2 border-amber-400 cursor-pointer">
             <i class="fa-solid fa-hands-praying text-amber-300 w-4 text-center"></i>
             <div>
               <div class="font-semibold text-amber-200">🌅 Waktu Terbit (Doa Kerja Melayang)</div>
               <div class="text-[10px] text-slate-300">Doa keluar rumah & mulai dinas melayang</div>
             </div>
+            <span class="active-badge hidden ml-auto text-[10px] bg-cyan-400 text-slate-950 font-bold px-2 py-0.5 rounded-full shadow-sm">
+              <i class="fa-solid fa-check mr-0.5"></i> Aktif
+            </span>
           </button>
 
-          <button type="button" onclick="selectWeatherMode('morning')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition">
+          <button type="button" onclick="selectWeatherMode('morning')" data-mode="morning" class="w-full text-left px-3.5 py-2 hover:bg-white/15 rounded-xl flex items-center gap-2.5 transition cursor-pointer">
             <i class="fa-solid fa-dove text-amber-300 w-4 text-center"></i>
             <div>
               <div class="font-semibold text-white">🌅 Pagi Ceria</div>
               <div class="text-[10px] text-slate-400">Burung-burung terbang & langit segar</div>
             </div>
+            <span class="active-badge hidden ml-auto text-[10px] bg-cyan-400 text-slate-950 font-bold px-2 py-0.5 rounded-full shadow-sm">
+              <i class="fa-solid fa-check mr-0.5"></i> Aktif
+            </span>
           </button>
-          <button type="button" onclick="selectWeatherMode('noon')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition">
+          <button type="button" onclick="selectWeatherMode('noon')" data-mode="noon" class="w-full text-left px-3.5 py-2 hover:bg-white/15 rounded-xl flex items-center gap-2.5 transition cursor-pointer">
             <i class="fa-solid fa-sun text-yellow-400 w-4 text-center"></i>
             <div>
               <div class="font-semibold text-white">☀️ Siang Hangat</div>
               <div class="text-[10px] text-slate-400">Matahari bersinar cerah & pantulan hangat</div>
             </div>
+            <span class="active-badge hidden ml-auto text-[10px] bg-cyan-400 text-slate-950 font-bold px-2 py-0.5 rounded-full shadow-sm">
+              <i class="fa-solid fa-check mr-0.5"></i> Aktif
+            </span>
           </button>
-          <button type="button" onclick="selectWeatherMode('sunset')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition">
+          <button type="button" onclick="selectWeatherMode('sunset')" data-mode="sunset" class="w-full text-left px-3.5 py-2 hover:bg-white/15 rounded-xl flex items-center gap-2.5 transition cursor-pointer">
             <i class="fa-solid fa-cloud-sun text-orange-400 w-4 text-center"></i>
             <div>
               <div class="font-semibold text-white">🌇 Sore Sunset</div>
               <div class="text-[10px] text-slate-400">Lembayung senja & kupu-kupu terbang</div>
             </div>
+            <span class="active-badge hidden ml-auto text-[10px] bg-cyan-400 text-slate-950 font-bold px-2 py-0.5 rounded-full shadow-sm">
+              <i class="fa-solid fa-check mr-0.5"></i> Aktif
+            </span>
           </button>
-          <button type="button" onclick="selectWeatherMode('night')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition">
+          <button type="button" onclick="selectWeatherMode('night')" data-mode="night" class="w-full text-left px-3.5 py-2 hover:bg-white/15 rounded-xl flex items-center gap-2.5 transition cursor-pointer">
             <i class="fa-solid fa-moon text-indigo-300 w-4 text-center"></i>
             <div>
               <div class="font-semibold text-white">🌌 Langit Malam</div>
               <div class="text-[10px] text-slate-400">Bulan, bintang & kunang-kunang kelap-kelip</div>
             </div>
+            <span class="active-badge hidden ml-auto text-[10px] bg-cyan-400 text-slate-950 font-bold px-2 py-0.5 rounded-full shadow-sm">
+              <i class="fa-solid fa-check mr-0.5"></i> Aktif
+            </span>
           </button>
-          <button type="button" onclick="selectWeatherMode('rain')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition">
+          <button type="button" onclick="selectWeatherMode('rain')" data-mode="rain" class="w-full text-left px-3.5 py-2 hover:bg-white/15 rounded-xl flex items-center gap-2.5 transition cursor-pointer">
             <i class="fa-solid fa-cloud-showers-heavy text-sky-400 w-4 text-center"></i>
             <div>
               <div class="font-semibold text-white">🌧️ Hujan Halus</div>
               <div class="text-[10px] text-slate-400">Rintik gerimis menyejukkan suasana</div>
             </div>
+            <span class="active-badge hidden ml-auto text-[10px] bg-cyan-400 text-slate-950 font-bold px-2 py-0.5 rounded-full shadow-sm">
+              <i class="fa-solid fa-check mr-0.5"></i> Aktif
+            </span>
           </button>
-          <button type="button" onclick="selectWeatherMode('static')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition border-t border-white/10">
+          <button type="button" onclick="selectWeatherMode('static')" data-mode="static" class="w-full text-left px-3.5 py-2 hover:bg-white/15 rounded-xl flex items-center gap-2.5 transition border-t border-white/10 cursor-pointer">
             <i class="fa-solid fa-battery-half text-emerald-400 w-4 text-center"></i>
             <div>
               <div class="font-semibold text-white">⚡ Mode Statis</div>
               <div class="text-[10px] text-slate-400">Tanpa partikel (Hemat daya & baterai)</div>
             </div>
+            <span class="active-badge hidden ml-auto text-[10px] bg-cyan-400 text-slate-950 font-bold px-2 py-0.5 rounded-full shadow-sm">
+              <i class="fa-solid fa-check mr-0.5"></i> Aktif
+            </span>
           </button>
         </div>
       </div>
@@ -992,17 +1208,23 @@
            ========================================================= -->
       <div id="loginTiltContainer" class="login-tilt-container relative z-20 lg:w-5/12 flex items-center justify-center p-5 sm:p-8 lg:p-10">
         
-        <div id="loginTiltCard" class="login-tilt-inner w-full max-w-md neon-border-wrapper">
-          <!-- PENDARAN AMBIENT & ASAP KABUT ROKOK MELAYANG MENYEBAR KELUAR 1 CM KE SEGALA ARAH -->
-          <div class="smoke-tendril smoke-tendril-top"></div>
-          <div class="smoke-tendril smoke-tendril-bottom"></div>
-          <div class="smoke-tendril smoke-tendril-left"></div>
-          <div class="smoke-tendril smoke-tendril-right"></div>
+        <div id="loginTiltCard" class="login-tilt-inner w-full max-w-md gemini-neon-border-wrapper">
+          <!-- LAPISAN 1: AURA ASAP/MIST RITMIK GEMINI (DIHISAP -> DIHEMBUSKAN KELUAR 7 DETIK -> BUYAR) -->
+          <div class="gemini-smoke-cloud gemini-smoke-ambient"></div>
+          <div class="gemini-smoke-cloud gemini-smoke-top"></div>
+          <div class="gemini-smoke-cloud gemini-smoke-left"></div>
+          <div class="gemini-smoke-cloud gemini-smoke-bottom"></div>
+          <div class="gemini-smoke-cloud gemini-smoke-right"></div>
 
-          <!-- KOTAK GELAP 10% TRANSPARAN MEWAH & ULTRA JERNIH (INNER CONTENT) -->
+          <!-- LAPISAN 2: BORDER NEON ANIMASI GOOGLE GEMINI (ROTASI GRADIEN CYAN, DEEP PURPLE, MAGENTA) -->
+          <div class="gemini-border-track">
+            <div class="gemini-border-rotator"></div>
+          </div>
+
+          <!-- LAPISAN 3: KOTAK GLASSMORPHISM ULTRA-SHEER (TRANSPARANSI ~10% OPACITY & BACKDROP BLUR 8PX) -->
           <div class="dark-translucent-box p-6 sm:p-8 space-y-5">
-            <!-- Ambient Top Accent Gradient -->
-            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-indigo-500 to-emerald-400 rounded-t-3xl"></div>
+            <!-- Ambient Top Accent Gradient ala Gemini -->
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 rounded-t-3xl"></div>
 
             <!-- Header Form Login dengan Logo Kecil & Sapaan Waktu Dinamis -->
             <div class="space-y-2">
@@ -1011,71 +1233,71 @@
                   <img id="loginLogoSmall" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
                     alt="Logo" class="w-full h-full object-contain">
                 </div>
-                <span id="timeGreetingBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm">
+                <span id="timeGreetingBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm">
                   ☀️ Selamat Datang
                 </span>
               </div>
-              <h2 class="text-2xl font-bold text-white pt-2 tracking-tight">Masuk ke Ruang Kerja</h2>
-              <p id="timeGreetingSub" class="text-xs text-slate-300">
+              <h2 class="text-2xl font-bold pt-2 tracking-tight glass-contrast-title">Masuk ke Ruang Kerja</h2>
+              <p id="timeGreetingSub" class="text-xs glass-contrast-sub">
                 Silakan masukkan akun Admin atau Staf Anda untuk membuka lembar kerja.
               </p>
             </div>
 
-            <!-- Form Input Login -->
+            <!-- Form Input Login dengan Kontras & Shadow Halus -->
             <form onsubmit="handleLogin(event)" class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Username Pegawai / Admin</label>
+                <label class="block text-xs uppercase tracking-wider mb-1.5 glass-contrast-label">Username Pegawai / Admin</label>
                 <div class="relative">
-                  <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-indigo-300"></i>
+                  <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-cyan-300"></i>
                   <input type="text" id="loginUsername" required placeholder="Ketik username Anda (contoh: admin / staf1)"
-                    class="w-full pl-10 pr-4 py-3 bg-slate-950/40 backdrop-blur-md border border-white/20 focus:border-cyan-400 focus:bg-slate-950/70 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 text-sm transition shadow-inner">
+                    class="w-full pl-10 pr-4 py-3 rounded-xl placeholder-slate-300 focus:outline-none text-sm transition glass-contrast-input">
                 </div>
               </div>
 
               <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Password</label>
+                <label class="block text-xs uppercase tracking-wider mb-1.5 glass-contrast-label">Password</label>
                 <div class="relative">
-                  <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-indigo-300"></i>
+                  <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-cyan-300"></i>
                   <input type="password" id="loginPassword" required placeholder="••••••••"
-                    class="w-full pl-10 pr-11 py-3 bg-slate-950/40 backdrop-blur-md border border-white/20 focus:border-cyan-400 focus:bg-slate-950/70 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 text-sm transition shadow-inner">
+                    class="w-full pl-10 pr-11 py-3 rounded-xl placeholder-slate-300 focus:outline-none text-sm transition glass-contrast-input">
                   <!-- Tombol Mata Lihat / Sembunyikan Password -->
                   <button type="button" onclick="togglePasswordVisibility()" title="Lihat / Sembunyikan Password"
-                    class="absolute right-3.5 top-3 text-slate-400 hover:text-cyan-400 transition">
+                    class="absolute right-3.5 top-3 text-slate-300 hover:text-cyan-300 transition">
                     <i id="eyePasswordIcon" class="fa-solid fa-eye"></i>
                   </button>
                 </div>
                 <!-- FITUR 1: PERINGATAN CAPS LOCK AKTIF (CAPS LOCK DETECTOR) -->
-                <div id="capsLockWarning" class="hidden mt-2 p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs flex items-center gap-2.5 animate-pulse shadow-sm">
+                <div id="capsLockWarning" class="hidden mt-2 p-2.5 rounded-xl bg-amber-500/25 border border-amber-500/50 text-amber-200 text-xs flex items-center gap-2.5 animate-pulse shadow-md">
                   <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base shrink-0"></i>
-                  <span><strong>Caps Lock Menyala:</strong> Huruf kapital aktif pada keyboard. Periksa pengetikan password agar akun tidak terkunci.</span>
+                  <span class="text-shadow-sm"><strong>Caps Lock Menyala:</strong> Huruf kapital aktif pada keyboard. Periksa pengetikan password agar akun tidak terkunci.</span>
                 </div>
               </div>
 
-              <div id="loginError" class="hidden text-xs bg-rose-500/15 border border-rose-500/40 text-rose-300 p-3 rounded-xl font-medium"></div>
+              <div id="loginError" class="hidden text-xs bg-rose-500/25 border border-rose-500/50 text-rose-200 p-3 rounded-xl font-medium shadow-md"></div>
 
               <button type="submit" id="btnLogin"
-                class="w-full py-3.5 bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/40 transition flex items-center justify-center gap-2 text-sm border border-indigo-400/30">
-                <span>Masuk ke Aplikasi</span>
+                class="w-full py-3.5 bg-gradient-to-r from-cyan-600 via-indigo-600 to-fuchsia-600 hover:from-cyan-500 hover:via-indigo-500 hover:to-fuchsia-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/40 transition flex items-center justify-center gap-2 text-sm border border-cyan-400/40 cursor-pointer">
+                <span class="text-shadow-sm">Masuk ke Aplikasi</span>
                 <i class="fa-solid fa-arrow-right"></i>
               </button>
 
               <!-- FITUR 6: TOMBOL VERIFIKASI CEPAT DOKUMEN PUBLIK (SCAN QR / KODE E-KINERJA) -->
               <button type="button" onclick="openPublicQRScannerModal()"
-                class="w-full py-2.5 px-3 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/40 hover:border-emerald-300 text-emerald-300 hover:text-emerald-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition shadow-sm group">
-                <i class="fa-solid fa-qrcode text-emerald-400 group-hover:scale-125 transition-transform duration-300"></i>
-                <span>Verifikasi Dokumen Publik (Scan QR / Kode e-Kinerja)</span>
+                class="w-full py-2.5 px-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 hover:border-emerald-300 text-emerald-200 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition shadow-sm group cursor-pointer">
+                <i class="fa-solid fa-qrcode text-emerald-300 group-hover:scale-125 transition-transform duration-300"></i>
+                <span class="text-shadow-sm">Verifikasi Dokumen Publik (Scan QR / Kode e-Kinerja)</span>
               </button>
 
               <!-- Tombol Pasang Aplikasi PWA -->
               <button type="button" onclick="triggerPwaInstall()" id="btnLoginPwaInstall"
-                class="w-full py-2 bg-slate-900/60 hover:bg-slate-800/80 border border-slate-700/60 text-slate-300 hover:text-white rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition shadow-sm group">
-                <i class="fa-solid fa-mobile-screen-button text-cyan-400 group-hover:scale-110 transition"></i>
-                <span>Pasang Aplikasi di Desktop / HP (PWA)</span>
+                class="w-full py-2 bg-slate-950/70 hover:bg-slate-900/90 border border-white/20 text-slate-200 hover:text-white rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition shadow-sm group cursor-pointer">
+                <i class="fa-solid fa-mobile-screen-button text-cyan-300 group-hover:scale-110 transition"></i>
+                <span class="text-shadow-sm">Pasang Aplikasi di Desktop / HP (PWA)</span>
               </button>
             </form>
 
             <!-- Footer Keamanan Resmi -->
-            <div class="flex items-center justify-center gap-2 pt-2 text-[11px] text-slate-300/80 border-t border-white/10">
+            <div class="flex items-center justify-center gap-2 pt-2 text-[11px] border-t border-white/10 glass-contrast-footer">
               <i class="fa-solid fa-shield-halved text-emerald-400"></i>
               <span>Sistem Keamanan Terenkripsi • Google Workspace Enterprise</span>
             </div>
@@ -3079,10 +3301,10 @@
     // (Pagi: Burung, Siang: Matahari, Sore: Sunset & Kupu-kupu, Malam: Bulan & Kunang-kunang)
     // =====================================================================
     var weatherAnimId = null;
-    var currentWeatherMode = 'auto';
+    var currentWeatherMode = 'auto'; // Default selalu otomatis saat staf atau admin membuka/login pertama kali
     try {
-      var savedMode = localStorage.getItem('gmonitor_weather_pref');
-      if (savedMode) currentWeatherMode = savedMode;
+      var manualSession = sessionStorage.getItem('gmonitor_weather_manual_mode');
+      if (manualSession) currentWeatherMode = manualSession;
     } catch (e) {}
 
     var weatherParticles = {
@@ -3160,6 +3382,24 @@
       var cur = config[currentWeatherMode] || config['auto'];
       iconEl.className = 'fa-solid ' + cur.icon + ' text-cyan-400';
       labelEl.textContent = cur.label;
+
+      // Update badge "Aktif" di menu dropdown pilihan suasana
+      var menu = document.getElementById('weatherDropdownMenu');
+      if (menu) {
+        var buttons = menu.querySelectorAll('button[data-mode]');
+        for (var i = 0; i < buttons.length; i++) {
+          var btn = buttons[i];
+          var m = btn.getAttribute('data-mode');
+          var badge = btn.querySelector('.active-badge');
+          if (m === currentWeatherMode) {
+            btn.classList.add('bg-cyan-500/20', 'border', 'border-cyan-400/50');
+            if (badge) badge.classList.remove('hidden');
+          } else {
+            btn.classList.remove('bg-cyan-500/20', 'border', 'border-cyan-400/50');
+            if (badge) badge.classList.add('hidden');
+          }
+        }
+      }
     }
 
     function getModeDisplayName(mode) {
@@ -3222,7 +3462,11 @@
     function selectWeatherMode(mode) {
       currentWeatherMode = mode;
       try {
-        localStorage.setItem('gmonitor_weather_pref', mode);
+        if (mode === 'auto') {
+          sessionStorage.removeItem('gmonitor_weather_manual_mode');
+        } else {
+          sessionStorage.setItem('gmonitor_weather_manual_mode', mode);
+        }
       } catch (e) {}
 
       var menu = document.getElementById('weatherDropdownMenu');
@@ -3232,7 +3476,7 @@
       restartWeatherCanvas();
 
       var modeTitles = {
-        auto: 'Suasana Otomatis Aktif',
+        auto: 'Suasana Otomatis Aktif (Default)',
         imsak: 'Suasana Waktu Imsak (Basmalah Melayang) Aktif',
         terbit: 'Suasana Waktu Terbit (Doa Memulai Kerja) Aktif',
         morning: 'Suasana Pagi Ceria Aktif',
@@ -3244,7 +3488,7 @@
       };
       showCosmicToast({
         type: 'success',
-        title: 'EFEK CUACA DIPERBARUI',
+        title: 'EFEK CUACA DITERAPKAN',
         message: modeTitles[mode] || 'Efek visual berhasil diterapkan.',
         duration: 2500
       });
