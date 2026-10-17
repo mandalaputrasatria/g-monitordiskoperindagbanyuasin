@@ -42,6 +42,7 @@ function doPost(e) {
     else if (fn === 'getStaffGridCells') result = getStaffGridCells(args[0]);
     else if (fn === 'updateStaffCellByA1') result = updateStaffCellByA1(args[0], args[1], args[2]);
     else if (fn === 'updateStaffData') result = updateStaffData(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+    else if (fn === 'forceAllStaffOffline') result = forceAllStaffOffline();
     else if (fn === 'deleteStaff') result = deleteStaff(args[0]);
     else result = { success: false, message: 'Fungsi tidak dikenal: ' + fn };
 
@@ -421,6 +422,14 @@ function sendHeartbeat(username, countRowsNow) {
   
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][col.username]).toLowerCase() === String(username).toLowerCase()) {
+      const currentStatus = String(data[i][col.status]).trim().toUpperCase();
+      
+      // JIKA STATUS STAFF SUDAH OFFLINE (karena dipaksa offline oleh Admin atau sudah logout)
+      // JANGAN ubah kembali ke ONLINE! Beritahu client staf agar segera logout otomatis!
+      if (currentStatus === 'OFFLINE') {
+        return { success: false, forcedOffline: true, message: 'Sesi kerja Anda telah dialihkan ke status Offline oleh Administrator.' };
+      }
+
       sheet.getRange(i + 1, col.lastActive + 1).setValue(nowMs);
       sheet.getRange(i + 1, col.status + 1).setValue('ONLINE');
       
@@ -939,19 +948,46 @@ function updateStaffData(idStaf, nama, nip, jabatan, unitKerja, noWa, fotoBase64
     sheetUsers.getRange(targetRow, col.password + 1).setValue(hashPassword(newPassword));
   }
   // Paksa Offline jika diminta
-  if (forceOffline) {
+  const isForceOffline = (forceOffline === true || String(forceOffline).toLowerCase() === 'true' || forceOffline === 1 || forceOffline === '1');
+  if (isForceOffline) {
     sheetUsers.getRange(targetRow, col.status + 1).setValue('OFFLINE');
-    sheetUsers.getRange(targetRow, col.lastActive + 1).setValue(new Date().getTime());
+    sheetUsers.getRange(targetRow, col.lastActive + 1).setValue(0);
   }
 
   return {
     success: true,
-    message: 'Data staf ' + (nama || '') + ' berhasil diperbarui!'
+    message: 'Data staf ' + (nama || '') + ' berhasil diperbarui!' + (isForceOffline ? ' Status staf berhasil dipaksa Offline.' : '')
   };
 }
 
 /**
- * 10. FUNGSI HAPUS STAF DARI DATABASE
+ * 10. FUNGSI PAKSA SEMUA STAF JADI OFFLINE SEKALIGUS (ADMIN UTAMA)
+ */
+function forceAllStaffOffline() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheetUsers = ss.getSheetByName('DB_USERS');
+  const data = sheetUsers.getDataRange().getValues();
+  const col = getUserColumnsMap(data[0]);
+  let count = 0;
+
+  for (let i = 1; i < data.length; i++) {
+    const role = String(data[i][col.role]).trim().toUpperCase();
+    if (role === 'STAF') {
+      sheetUsers.getRange(i + 1, col.status + 1).setValue('OFFLINE');
+      sheetUsers.getRange(i + 1, col.lastActive + 1).setValue(0);
+      count++;
+    }
+  }
+
+  return {
+    success: true,
+    message: count + ' akun staf pegawai berhasil dialihkan ke status Offline!',
+    count: count
+  };
+}
+
+/**
+ * 11. FUNGSI HAPUS STAF DARI DATABASE
  */
 function deleteStaff(idStaf) {
   if (!idStaf) return { success: false, message: 'ID Staf tidak valid' };

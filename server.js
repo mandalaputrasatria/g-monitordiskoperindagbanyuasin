@@ -224,6 +224,12 @@ function sendHeartbeat(username, countRowsNow) {
   const user = (db.users || []).find(u => u.username.toLowerCase() === String(username).trim().toLowerCase());
   if (!user) return { success: false };
 
+  // Jika status manual staf sudah OFFLINE (karena dipaksa offline oleh Admin atau sudah logout)
+  // JANGAN ubah kembali ke ONLINE! Beritahu client staf agar segera logout!
+  if (String(user.statusManual).trim().toUpperCase() === 'OFFLINE') {
+    return { success: false, forcedOffline: true, message: 'Sesi kerja Anda telah dialihkan ke status Offline oleh Administrator.' };
+  }
+
   const nowMs = Date.now();
   user.lastActiveMs = nowMs;
   user.statusManual = 'ONLINE';
@@ -395,12 +401,31 @@ function updateStaffData(idStaf, nama, nip, jabatan, unitKerja, noWa, fotoBase64
   if (newPassword && String(newPassword).trim() !== '') {
     user.password = hashPassword(newPassword);
   }
-  if (forceOffline) {
+  const isForceOffline = (forceOffline === true || String(forceOffline).toLowerCase() === 'true' || forceOffline === 1 || forceOffline === '1');
+  if (isForceOffline) {
     user.statusManual = 'OFFLINE';
-    user.lastActiveMs = Date.now();
+    user.lastActiveMs = 0;
   }
   writeDB(db);
-  return { success: true, message: 'Data staf ' + (nama || '') + ' berhasil diperbarui!' };
+  return { success: true, message: 'Data staf ' + (nama || '') + ' berhasil diperbarui!' + (isForceOffline ? ' Status staf berhasil dipaksa Offline.' : '') };
+}
+
+function forceAllStaffOffline() {
+  const db = readDB();
+  let count = 0;
+  (db.users || []).forEach(u => {
+    if (String(u.role).trim().toUpperCase() === 'STAF') {
+      u.statusManual = 'OFFLINE';
+      u.lastActiveMs = 0;
+      count++;
+    }
+  });
+  writeDB(db);
+  return {
+    success: true,
+    message: count + ' akun staf pegawai berhasil dialihkan ke status Offline!',
+    count: count
+  };
 }
 
 function deleteStaff(idStaf) {
@@ -627,6 +652,9 @@ app.post('/api/gas-call', async (req, res) => {
         break;
       case 'updateStaffData':
         result = updateStaffData(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9]);
+        break;
+      case 'forceAllStaffOffline':
+        result = forceAllStaffOffline();
         break;
       case 'deleteStaff':
         result = deleteStaff(a[0]);

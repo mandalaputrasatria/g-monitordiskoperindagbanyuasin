@@ -849,6 +849,14 @@
           <span>Sinkronkan Baris</span>
         </button>
 
+        <!-- TOMBOL PAKSA SEMUA STAF OFFLINE -->
+        <button type="button" onclick="confirmForceAllStaffOffline()" id="btnForceAllOffline"
+          class="px-3.5 py-2 bg-rose-500/15 hover:bg-rose-600 border border-rose-500/30 text-rose-600 dark:text-rose-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition"
+          title="Paksa dan putuskan status sesi aktif seluruh staf pegawai menjadi Offline">
+          <i class="fa-solid fa-power-off"></i>
+          <span>Paksa Semua Offline</span>
+        </button>
+
         <button type="button" onclick="openAddStaffModal()"
           class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
           <i class="fa-solid fa-user-plus"></i>
@@ -1588,13 +1596,32 @@
           </div>
         </div>
 
-        <!-- Opsi Paksa Status Offline -->
-        <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/60 rounded-xl">
-          <div>
-            <span class="font-semibold text-slate-700 dark:text-slate-300 block text-xs">Paksa Status Jadi Offline</span>
-            <span class="text-[10px] text-slate-400">Gunakan jika staf lupa logout atau sesi di perangkat staf macet</span>
+        <!-- Status Sesi & Opsi Paksa Offline -->
+        <div class="p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/60 rounded-xl space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="font-semibold text-slate-700 dark:text-slate-300 block text-xs">Status Sesi Staf Saat Ini</span>
+              <span class="text-[10px] text-slate-400">Koneksi aktif browser staf saat ini</span>
+            </div>
+            <div id="editStaffStatusBadgeContainer">
+              <span id="editStaffStatusBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-500/15 text-slate-400 border border-slate-500/30">Memeriksa...</span>
+            </div>
           </div>
-          <input type="checkbox" id="editStaffForceOffline" class="w-4 h-4 accent-rose-500 cursor-pointer">
+
+          <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="editStaffForceOffline" class="w-4 h-4 accent-rose-500 rounded cursor-pointer">
+              <span class="text-xs font-semibold text-rose-600 dark:text-rose-400">Paksa Status Jadi Offline</span>
+            </label>
+            <button type="button" id="btnQuickForceOfflineNow" onclick="quickForceOfflineCurrentModalStaff()"
+              class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-[11px] font-bold shadow flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-power-off"></i>
+              <span>Putuskan Sesi Sekarang</span>
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-400 leading-tight">
+            *Jika fitur ini dijalankan, sesi di browser staf akan langsung dihentikan/logout otomatis saat sinkronisasi berikutnya.
+          </p>
         </div>
 
         <div class="pt-2 flex items-center justify-between border-t border-slate-200 dark:border-slate-700">
@@ -2390,6 +2417,8 @@
     }
 
     function initInactivitySessionGuard() {
+      // Deteksi Interaksi Hanya Bekerja Pada Tab/Halaman Link Aplikasi Ini Saja
+      // (Berdasarkan Browser Security Sandbox, aktivitas di luar tab aplikasi tidak dapat dan tidak boleh dipantau)
       var events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
       var throttleTime = 0;
       events.forEach(function(evt) {
@@ -2400,6 +2429,27 @@
             resetUserInactivityTimer();
           }
         }, { passive: true });
+      });
+
+      // Deteksi ketika staf/admin berpindah ke tab lain atau meminimalkan browser
+      document.addEventListener('visibilitychange', function() {
+        if (!currentUser) return;
+        if (document.visibilityState === 'visible') {
+          // Ketika kembali membuka tab alamat link ini, periksa apakah sudah melebihi 5 menit tanpa sentuhan
+          var idleDuration = Date.now() - lastUserActivityTimestamp;
+          if (idleDuration >= INACTIVITY_TIMEOUT_MS) {
+            var roleLabel = (currentUser.role === 'ADMIN') ? 'Administrator' : 'Staf Pegawai';
+            inactivityWarningShown = false;
+            handleLogout();
+            showCosmicToast({
+              type: 'logout',
+              title: 'SESI DIKUNCI OTOMATIS 🔒',
+              message: 'Inaktivitas 5 Menit (' + roleLabel + ')',
+              subDetail: 'Halaman web tidak disentuh selama 5 menit. Sesi dikunci demi keamanan.',
+              duration: 5000
+            });
+          }
+        }
       });
 
       if (inactivityCheckInterval) clearInterval(inactivityCheckInterval);
@@ -4570,7 +4620,7 @@
       switchStaffViewTab('iframe');
 
       triggerHeartbeat(true);
-      staffHeartbeatTimer = setInterval(function() { triggerHeartbeat(true); }, 45000);
+      staffHeartbeatTimer = setInterval(function() { triggerHeartbeat(true); }, 30000);
     }
 
     function triggerHeartbeat(countRowsNow) {
@@ -4581,7 +4631,26 @@
             document.getElementById('staffRowCounter').textContent = res.totalBaris;
             var timeStr = new Date().toLocaleTimeString('id-ID');
             document.getElementById('heartbeatInfo').textContent = 'Heartbeat Online (' + timeStr + ')';
+          } else if (res && res.forcedOffline) {
+            // Sesi kerja dipaksa Offline oleh Administrator
+            if (staffHeartbeatTimer) {
+              clearInterval(staffHeartbeatTimer);
+              staffHeartbeatTimer = null;
+            }
+            if (isDictating) stopVoiceDictation();
+            var staffNama = currentUser ? currentUser.nama : 'Staf Pegawai';
+            handleLogout();
+            showCosmicToast({
+              type: 'logout',
+              title: 'SESI DINONAKTIFKAN ADMIN 🔒',
+              message: staffNama,
+              subDetail: res.message || 'Administrator telah menonaktifkan sesi aktif Anda di sistem.',
+              duration: 5000
+            });
           }
+        })
+        .withFailureHandler(function(err) {
+          console.warn('Heartbeat gagal sinkron:', err);
         })
         .sendHeartbeat(currentUser.username, countRowsNow);
     }
@@ -4718,6 +4787,11 @@
               'class="px-2.5 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1 transition" title="Edit Data & Profil Staf">' +
               '<i class="fa-solid fa-user-pen text-indigo-500"></i><span>Edit</span>' +
             '</button>' +
+            (staf.isOnline ? 
+              '<button type="button" onclick="quickForceOfflineDirect(\'' + safeId + '\', \'' + escapeHtml(staf.nama).replace(/'/g, "\\'") + '\')" ' +
+                'class="p-2 bg-rose-500/15 hover:bg-rose-600 border border-rose-500/30 text-rose-600 dark:text-rose-300 hover:text-white rounded-xl text-xs font-semibold transition flex items-center justify-center" title="Putuskan Sesi & Paksa Staf Ini Offline Sekarang">' +
+                '<i class="fa-solid fa-power-off"></i>' +
+              '</button>' : '') +
             '<a href="' + safeSheetUrl + '" target="_blank" rel="noopener noreferrer" class="p-2 bg-emerald-600/15 hover:bg-emerald-600 text-emerald-600 hover:text-white border border-emerald-500/30 rounded-xl text-xs transition flex items-center justify-center" title="Buka Langsung di Google Spreadsheets">' +
               '<i class="fa-solid fa-arrow-up-right-from-square"></i>' +
             '</a>' +
@@ -5019,6 +5093,21 @@
       document.getElementById('editStaffFotoUrl').value = '';
       editStaffFotoBase64 = '';
 
+      // Tampilkan Badge Status Sesi Staf Secara Akurat
+      var statusBadge = document.getElementById('editStaffStatusBadge');
+      var quickBtn = document.getElementById('btnQuickForceOfflineNow');
+      if (statusBadge) {
+        if (staf.isOnline) {
+          statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5';
+          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ONLINE AKTIF';
+          if (quickBtn) quickBtn.classList.remove('hidden');
+        } else {
+          statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-500/15 text-slate-500 dark:text-slate-400 border border-slate-500/30 flex items-center gap-1.5';
+          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-400"></span> OFFLINE';
+          if (quickBtn) quickBtn.classList.add('hidden');
+        }
+      }
+
       var preview = document.getElementById('editStaffFotoPreview');
       if (preview) {
         preview.src = sanitizeImageUrlForLocal(staf.fotoUrl || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png');
@@ -5078,14 +5167,23 @@
           btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i><span>Simpan Perubahan</span>';
           if (res && res.success) {
             closeEditStaffModal();
+            // Pembaruan instan kartu staf lokal jika Admin memilih paksa offline
+            if (forceOffline && currentStaffList) {
+              var sObj = currentStaffList.find(function(s) { return String(s.id).trim() === String(idStaf).trim(); });
+              if (sObj) {
+                sObj.isOnline = false;
+                sObj.status = 'OFFLINE';
+                renderStaffCards(currentStaffList);
+              }
+            }
             refreshAdminData(false);
             showCosmicToast({
               type: 'save',
-              title: 'DATA PEGAWAI DIPERBARUI!',
+              title: forceOffline ? 'STAF BERHASIL DIOFFLINEKAN! 🔴' : 'DATA PEGAWAI DIPERBARUI!',
               message: nama,
-              subDetail: jabatan + ' • ' + (unitKerja || 'Unit Kerja'),
+              subDetail: forceOffline ? 'Status kerja dialihkan ke Offline oleh Admin' : (jabatan + ' • ' + (unitKerja || 'Unit Kerja')),
               avatar: editStaffFotoBase64 || rawFotoUrl || '',
-              duration: 1700
+              duration: 2200
             });
           } else {
             alert(res ? res.message : 'Gagal memperbarui data staf');
@@ -5097,6 +5195,147 @@
           alert('Gagal memperbarui staf: ' + err.message);
         })
         .updateStaffData(idStaf, nama, nip, jabatan, unitKerja, noWa, editStaffFotoBase64, rawFotoUrl, newPass, forceOffline);
+    }
+
+    // Fungsi Langsung Putuskan Sesi Staf Tertentu dari Kartu Dashboard
+    function quickForceOfflineDirect(staffId, staffNama) {
+      if (!confirm('PERINGATAN ADMINISTRATOR:\nApakah Anda yakin ingin memutuskan sesi dan memaksa staf "' + staffNama + '" menjadi OFFLINE sekarang?')) {
+        return;
+      }
+      var staf = currentStaffList.find(function(s) { return String(s.id).trim() === String(staffId).trim(); });
+      if (!staf) return;
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            staf.isOnline = false;
+            staf.status = 'OFFLINE';
+            renderStaffCards(currentStaffList);
+            refreshAdminData(false);
+            showCosmicToast({
+              type: 'save',
+              title: 'STAF BERHASIL DIOFFLINEKAN! 🔴',
+              message: staffNama,
+              subDetail: 'Sesi aktif di browser staf telah diputus oleh Admin',
+              duration: 2200
+            });
+          } else {
+            alert(res ? res.message : 'Gagal memutuskan status staf');
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('Gagal memutuskan status staf: ' + err.message);
+        })
+        .updateStaffData(staf.id, staf.nama, staf.nip, staf.jabatan, staf.unitKerja, staf.noWa, '', staf.fotoUrl, '', true);
+    }
+
+    // Fungsi Putuskan Sesi Staf dari dalam Modal Edit Data Pegawai
+    function quickForceOfflineCurrentModalStaff() {
+      var staffId = document.getElementById('editStaffId').value;
+      var nama = document.getElementById('editStaffNama').value;
+      if (!staffId) return;
+
+      if (!confirm('PERINGATAN ADMINISTRATOR:\nApakah Anda yakin ingin memutuskan sesi staf "' + nama + '" dan memaksanya Offline sekarang?')) {
+        return;
+      }
+
+      var quickBtn = document.getElementById('btnQuickForceOfflineNow');
+      if (quickBtn) {
+        quickBtn.disabled = true;
+        quickBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Memutuskan...</span>';
+      }
+
+      var nip = document.getElementById('editStaffNip').value.trim();
+      var jabatan = document.getElementById('editStaffJabatan').value.trim();
+      var unitKerja = document.getElementById('editStaffUnit').value.trim();
+      var noWa = document.getElementById('editStaffWa').value.trim();
+      var rawFotoUrl = document.getElementById('editStaffFotoUrl').value.trim();
+      var newPass = document.getElementById('editStaffPass').value.trim();
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (quickBtn) {
+            quickBtn.disabled = false;
+            quickBtn.innerHTML = '<i class="fa-solid fa-power-off"></i><span>Putuskan Sesi Sekarang</span>';
+          }
+          if (res && res.success) {
+            closeEditStaffModal();
+            if (currentStaffList) {
+              var sObj = currentStaffList.find(function(s) { return String(s.id).trim() === String(staffId).trim(); });
+              if (sObj) {
+                sObj.isOnline = false;
+                sObj.status = 'OFFLINE';
+                renderStaffCards(currentStaffList);
+              }
+            }
+            refreshAdminData(false);
+            showCosmicToast({
+              type: 'save',
+              title: 'STAF BERHASIL DIOFFLINEKAN! 🔴',
+              message: nama,
+              subDetail: 'Sesi aktif staf telah diputus dan dialihkan ke Offline',
+              duration: 2200
+            });
+          } else {
+            alert(res ? res.message : 'Gagal memaksa status offline');
+          }
+        })
+        .withFailureHandler(function(err) {
+          if (quickBtn) {
+            quickBtn.disabled = false;
+            quickBtn.innerHTML = '<i class="fa-solid fa-power-off"></i><span>Putuskan Sesi Sekarang</span>';
+          }
+          alert('Gagal memutuskan status staf: ' + err.message);
+        })
+        .updateStaffData(staffId, nama, nip, jabatan, unitKerja, noWa, editStaffFotoBase64, rawFotoUrl, newPass, true);
+    }
+
+    // Fungsi Paksa SEMUA Staf Pegawai Menjadi Offline Sekaligus
+    function confirmForceAllStaffOffline() {
+      if (!confirm('PERINGATAN ADMINISTRATOR SISTEM:\nApakah Anda yakin ingin memaksa status SEMUA staf pegawai menjadi OFFLINE sekarang?\n\nSemua staf yang sedang login akan diputuskan sesinya dan diarahkan kembali ke layar login.')) {
+        return;
+      }
+
+      var btn = document.getElementById('btnForceAllOffline');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Memproses...</span>';
+      }
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-power-off"></i><span>Paksa Semua Offline</span>';
+          }
+          if (res && res.success) {
+            if (currentStaffList) {
+              currentStaffList.forEach(function(s) {
+                s.isOnline = false;
+                s.status = 'OFFLINE';
+              });
+              renderStaffCards(currentStaffList);
+            }
+            refreshAdminData(false);
+            showCosmicToast({
+              type: 'save',
+              title: 'SEMUA STAF DIOFFLINEKAN! 🔴',
+              message: res.message || 'Semua sesi staf berhasil diputus',
+              subDetail: 'Seluruh akun staf pegawai kini berstatus Offline',
+              duration: 2500
+            });
+          } else {
+            alert(res ? res.message : 'Gagal memutuskan sesi staf');
+          }
+        })
+        .withFailureHandler(function(err) {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-power-off"></i><span>Paksa Semua Offline</span>';
+          }
+          alert('Gagal: ' + err.message);
+        })
+        .forceAllStaffOffline();
     }
 
     function confirmDeleteCurrentStaff() {
