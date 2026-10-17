@@ -390,21 +390,14 @@
       100% { transform: rotate(360deg); }
     }
 
+    /* Poin 3: Bingkai Garis Tepi (Border) Kotak Berwarna Neon Pelangi Menyala */
     .neon-border-wrapper {
       position: relative;
       border-radius: 28px;
-      padding: 3px;
-      overflow: hidden;
+      padding: 2px;
+      overflow: visible !important; /* Memungkinkan asap rokok menyebar bebas 1 cm ke luar */
       isolation: isolate;
-      box-shadow: 0 25px 65px rgba(0, 0, 0, 0.65), 0 0 35px rgba(99, 102, 241, 0.25);
-    }
-
-    .neon-rotating-conic {
-      position: absolute;
-      top: -65%;
-      left: -65%;
-      width: 230%;
-      height: 230%;
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.55), 0 0 32px rgba(139, 92, 246, 0.35), 0 20px 50px rgba(0, 0, 0, 0.5);
       background: conic-gradient(
         from 0deg,
         #06b6d4 0%,
@@ -415,110 +408,85 @@
         #10b981 83%,
         #06b6d4 100%
       );
-      animation: rotateNeonConic 4.8s linear infinite;
-      z-index: 0;
-      pointer-events: none;
     }
 
-    .neon-rotating-glow {
+    /* Pendaran Cahaya Ambient & Asap Kabut Rokok Melayang Menyebar Keluar 1 cm (~38px) */
+    @keyframes cigaretteSmokeDriftTop {
+      0%, 100% { transform: translateY(-6px) scale(0.95); opacity: 0.40; }
+      50% { transform: translateY(-38px) scale(1.35) rotate(4deg); opacity: 0.85; } /* Melayang 1 cm (38px) ke atas */
+    }
+    @keyframes cigaretteSmokeDriftBottom {
+      0%, 100% { transform: translateY(6px) scale(0.95); opacity: 0.40; }
+      50% { transform: translateY(38px) scale(1.35) rotate(-4deg); opacity: 0.85; } /* Melayang 1 cm (38px) ke bawah */
+    }
+    @keyframes cigaretteSmokeDriftLeft {
+      0%, 100% { transform: translateX(-6px) scale(0.95); opacity: 0.40; }
+      50% { transform: translateX(-38px) scale(1.35) rotate(-5deg); opacity: 0.85; } /* Melayang 1 cm (38px) ke kiri */
+    }
+    @keyframes cigaretteSmokeDriftRight {
+      0%, 100% { transform: translateX(6px) scale(0.95); opacity: 0.40; }
+      50% { transform: translateX(38px) scale(1.35) rotate(5deg); opacity: 0.85; } /* Melayang 1 cm (38px) ke kanan */
+    }
+
+    .smoke-tendril {
       position: absolute;
-      top: -70%;
-      left: -70%;
-      width: 240%;
-      height: 240%;
-      background: conic-gradient(
-        from 0deg,
-        rgba(6, 182, 212, 0.85) 0%,
-        rgba(59, 130, 246, 0.85) 16%,
-        rgba(139, 92, 246, 0.85) 33%,
-        rgba(236, 72, 153, 0.85) 50%,
-        rgba(245, 158, 11, 0.85) 66%,
-        rgba(16, 185, 129, 0.85) 83%,
-        rgba(6, 182, 212, 0.85) 100%
-      );
-      animation: rotateNeonConic 4.8s linear infinite;
-      filter: blur(28px);
-      opacity: 0.75;
-      z-index: -1;
       pointer-events: none;
-    }
-
-    /* Asap Kabut Tipis Mengikuti Warna Lampu Neon */
-    @keyframes smokeDrift1 {
-      0%, 100% { transform: translate(-8%, -10%) scale(1) rotate(0deg); opacity: 0.38; }
-      50% { transform: translate(14%, 12%) scale(1.35) rotate(55deg); opacity: 0.68; }
-    }
-    @keyframes smokeDrift2 {
-      0%, 100% { transform: translate(12%, 14%) scale(1.25) rotate(0deg); opacity: 0.42; }
-      50% { transform: translate(-12%, -8%) scale(0.95) rotate(-45deg); opacity: 0.72; }
-    }
-    @keyframes smokeDrift3 {
-      0%, 100% { transform: translate(-6%, 10%) scale(1.1) rotate(0deg); opacity: 0.35; }
-      50% { transform: translate(10%, -14%) scale(1.3) rotate(40deg); opacity: 0.65; }
-    }
-
-    .smoke-layer-cyan {
-      position: absolute;
-      width: 170px;
-      height: 170px;
-      top: -20px;
-      left: -20px;
-      background: radial-gradient(circle, rgba(6, 182, 212, 0.6) 0%, rgba(6, 182, 212, 0) 70%);
-      filter: blur(35px);
+      border-radius: 50%;
+      filter: blur(18px);
       mix-blend-mode: screen;
-      pointer-events: none;
       z-index: 1;
-      animation: smokeDrift1 7s ease-in-out infinite;
     }
-    .smoke-layer-pink {
-      position: absolute;
-      width: 180px;
-      height: 180px;
-      bottom: -30px;
-      right: -20px;
-      background: radial-gradient(circle, rgba(236, 72, 153, 0.55) 0%, rgba(236, 72, 153, 0) 70%);
-      filter: blur(38px);
-      mix-blend-mode: screen;
-      pointer-events: none;
-      z-index: 1;
-      animation: smokeDrift2 8.5s ease-in-out infinite;
-    }
-    .smoke-layer-amber {
-      position: absolute;
-      width: 160px;
-      height: 160px;
-      bottom: -15px;
+    .smoke-tendril-top {
+      top: -18px;
       left: 15%;
-      background: radial-gradient(circle, rgba(245, 158, 11, 0.5) 0%, rgba(245, 158, 11, 0) 70%);
-      filter: blur(34px);
-      mix-blend-mode: screen;
-      pointer-events: none;
-      z-index: 1;
-      animation: smokeDrift3 9s ease-in-out infinite;
+      width: 70%;
+      height: 48px;
+      background: radial-gradient(ellipse at center, rgba(6, 182, 212, 0.7) 0%, rgba(59, 130, 246, 0.35) 45%, transparent 75%);
+      animation: cigaretteSmokeDriftTop 6.2s ease-in-out infinite;
     }
-    .smoke-layer-emerald {
-      position: absolute;
-      width: 160px;
-      height: 160px;
+    .smoke-tendril-bottom {
+      bottom: -18px;
+      left: 15%;
+      width: 70%;
+      height: 48px;
+      background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.65) 0%, rgba(245, 158, 11, 0.35) 45%, transparent 75%);
+      animation: cigaretteSmokeDriftBottom 6.8s ease-in-out infinite;
+    }
+    .smoke-tendril-left {
+      left: -18px;
       top: 15%;
-      right: -25px;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.55) 0%, rgba(16, 185, 129, 0) 70%);
-      filter: blur(34px);
-      mix-blend-mode: screen;
-      pointer-events: none;
-      z-index: 1;
-      animation: smokeDrift1 8s ease-in-out infinite reverse;
+      width: 48px;
+      height: 70%;
+      background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.7) 0%, rgba(6, 182, 212, 0.35) 45%, transparent 75%);
+      animation: cigaretteSmokeDriftLeft 6.5s ease-in-out infinite;
+    }
+    .smoke-tendril-right {
+      right: -18px;
+      top: 15%;
+      width: 48px;
+      height: 70%;
+      background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.7) 0%, rgba(245, 158, 11, 0.35) 45%, transparent 75%);
+      animation: cigaretteSmokeDriftRight 7.0s ease-in-out infinite;
     }
 
-    /* Kotak Gelap 50% Transparan Mewah & Elegan */
+    /* Poin 3: Kotak Gelap 10% Transparan Ultra Jernih (Tanpa Blok Hitam Tebal) */
     .dark-translucent-box {
-      background-color: rgba(5, 10, 24, 0.50) !important;
-      backdrop-filter: blur(28px) saturate(190%) !important;
-      -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.14) !important;
-      border-radius: 25px;
+      background-color: rgba(8, 14, 28, 0.10) !important; /* 10% transparan mewah */
+      backdrop-filter: blur(18px) saturate(190%) !important;
+      -webkit-backdrop-filter: blur(18px) saturate(190%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      border-radius: 26px;
       position: relative;
       z-index: 2;
+    }
+
+    /* Animasi Teks Kaligrafi Melayang (Imsak & Terbit) */
+    @keyframes floatSpiritual {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(0.8deg); }
+    }
+    .floating-spiritual-box {
+      animation: floatSpiritual 5.5s ease-in-out infinite;
     }
 
     /* Teks Berjalan Pengumuman Buletin (Continuous Marquee) */
@@ -851,26 +819,45 @@
       </div>
 
       <!-- FITUR 4: PENGATUR EFEK CUACA INTERAKTIF (WEATHER & ATMOSPHERE SELECTOR) -->
-      <div class="relative inline-block text-left" id="weatherDropdownWrapper">
+      <div class="relative inline-block text-left z-[80]" id="weatherDropdownWrapper">
         <button type="button" onclick="toggleWeatherDropdown(event)" id="btnWeatherSelector"
-          class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/70 hover:bg-slate-900/90 backdrop-blur-md border border-cyan-400/40 text-xs font-semibold text-cyan-200 shadow-lg transition hover:scale-105 active:scale-95">
+          class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-900/95 backdrop-blur-md border border-cyan-400/50 text-xs font-semibold text-cyan-200 shadow-xl transition hover:scale-105 active:scale-95 cursor-pointer">
           <i id="weatherCurrentIcon" class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i>
           <span id="weatherCurrentLabel">Suasana: Otomatis</span>
           <i class="fa-solid fa-chevron-down text-[10px] text-cyan-300"></i>
         </button>
         <!-- Dropdown Menu Cuaca -->
-        <div id="weatherDropdownMenu" class="hidden absolute right-0 mt-2 w-64 rounded-2xl bg-slate-950/95 backdrop-blur-2xl border border-cyan-500/40 shadow-[0_12px_45px_rgba(0,0,0,0.85)] py-2 z-50 text-xs text-slate-200 space-y-1">
+        <div id="weatherDropdownMenu" class="hidden absolute right-0 mt-2 w-72 rounded-2xl bg-slate-950/98 backdrop-blur-2xl border border-cyan-500/50 shadow-[0_15px_50px_rgba(0,0,0,0.9)] py-2 z-[99] text-xs text-slate-200 space-y-1">
           <div class="px-3.5 py-1.5 text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-white/10 flex items-center justify-between">
             <span>Personalisasi Atmosfer</span>
-            <span class="text-cyan-400">Live FX</span>
+            <span class="text-cyan-400 font-mono">Live FX</span>
           </div>
           <button type="button" onclick="selectWeatherMode('auto')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition">
             <i class="fa-solid fa-clock-rotate-left text-cyan-400 w-4 text-center"></i>
             <div>
               <div class="font-semibold text-white">🌐 Otomatis (Waktu Nyata)</div>
-              <div class="text-[10px] text-slate-400">Pagi, siang, sore, malam sesuai jam</div>
+              <div class="text-[10px] text-slate-400">Pagi, siang, sore, malam, imsak, terbit</div>
             </div>
           </button>
+          
+          <!-- EFEK WAKTU IMSAK (BASMALAH MELAYANG) -->
+          <button type="button" onclick="selectWeatherMode('imsak')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition bg-indigo-500/10 border-l-2 border-indigo-400">
+            <i class="fa-solid fa-star-and-crescent text-cyan-300 w-4 text-center"></i>
+            <div>
+              <div class="font-semibold text-cyan-200">🌙 Waktu Imsak (Basmalah Melayang)</div>
+              <div class="text-[10px] text-slate-300">Kaligrafi Basmalah, latin & artinya melayang</div>
+            </div>
+          </button>
+
+          <!-- EFEK WAKTU TERBIT (DOA KELUAR RUMAH & KERJA MELAYANG) -->
+          <button type="button" onclick="selectWeatherMode('terbit')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition bg-amber-500/10 border-l-2 border-amber-400">
+            <i class="fa-solid fa-hands-praying text-amber-300 w-4 text-center"></i>
+            <div>
+              <div class="font-semibold text-amber-200">🌅 Waktu Terbit (Doa Kerja Melayang)</div>
+              <div class="text-[10px] text-slate-300">Doa keluar rumah & mulai dinas melayang</div>
+            </div>
+          </button>
+
           <button type="button" onclick="selectWeatherMode('morning')" class="w-full text-left px-3.5 py-2 hover:bg-white/10 flex items-center gap-2.5 transition">
             <i class="fa-solid fa-dove text-amber-300 w-4 text-center"></i>
             <div>
@@ -914,6 +901,13 @@
             </div>
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- OVERLAY SPIRITUAL MELAYANG (WAKTU IMSAK: BASMALAH | WAKTU TERBIT: DOA KERJA) -->
+    <div id="spiritualFloatingOverlay" class="hidden absolute top-20 sm:top-24 left-1/2 -translate-x-1/2 z-30 pointer-events-none w-11/12 max-w-xl transition-all duration-700">
+      <div id="spiritualCardContent" class="floating-spiritual-box p-5 sm:p-6 rounded-3xl bg-slate-950/80 border border-amber-400/40 backdrop-blur-2xl shadow-[0_0_50px_rgba(251,191,36,0.35)] text-center space-y-2 select-none">
+        <!-- Content will be injected dynamically by JS -->
       </div>
     </div>
 
@@ -999,17 +993,13 @@
       <div id="loginTiltContainer" class="login-tilt-container relative z-20 lg:w-5/12 flex items-center justify-center p-5 sm:p-8 lg:p-10">
         
         <div id="loginTiltCard" class="login-tilt-inner w-full max-w-md neon-border-wrapper">
-          <!-- ROTATING NEON RAINBOW BEAM & GLOW -->
-          <div class="neon-rotating-conic"></div>
-          <div class="neon-rotating-glow"></div>
+          <!-- PENDARAN AMBIENT & ASAP KABUT ROKOK MELAYANG MENYEBAR KELUAR 1 CM KE SEGALA ARAH -->
+          <div class="smoke-tendril smoke-tendril-top"></div>
+          <div class="smoke-tendril smoke-tendril-bottom"></div>
+          <div class="smoke-tendril smoke-tendril-left"></div>
+          <div class="smoke-tendril smoke-tendril-right"></div>
 
-          <!-- ASAP KABUT TIPIS WARNA-WARNI SENADA NEON -->
-          <div class="smoke-layer-cyan"></div>
-          <div class="smoke-layer-pink"></div>
-          <div class="smoke-layer-amber"></div>
-          <div class="smoke-layer-emerald"></div>
-
-          <!-- KOTAK GELAP 50% TRANSPARAN MEWAH & ELEGAN (INNER CONTENT) -->
+          <!-- KOTAK GELAP 10% TRANSPARAN MEWAH & ULTRA JERNIH (INNER CONTENT) -->
           <div class="dark-translucent-box p-6 sm:p-8 space-y-5">
             <!-- Ambient Top Accent Gradient -->
             <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-indigo-500 to-emerald-400 rounded-t-3xl"></div>
@@ -1038,7 +1028,7 @@
                 <div class="relative">
                   <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-indigo-300"></i>
                   <input type="text" id="loginUsername" required placeholder="Ketik username Anda (contoh: admin / staf1)"
-                    class="w-full pl-10 pr-4 py-3 bg-slate-900/80 border border-slate-700/80 focus:border-cyan-400 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 text-sm transition shadow-inner">
+                    class="w-full pl-10 pr-4 py-3 bg-slate-950/40 backdrop-blur-md border border-white/20 focus:border-cyan-400 focus:bg-slate-950/70 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 text-sm transition shadow-inner">
                 </div>
               </div>
 
@@ -1047,7 +1037,7 @@
                 <div class="relative">
                   <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-indigo-300"></i>
                   <input type="password" id="loginPassword" required placeholder="••••••••"
-                    class="w-full pl-10 pr-11 py-3 bg-slate-900/80 border border-slate-700/80 focus:border-cyan-400 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 text-sm transition shadow-inner">
+                    class="w-full pl-10 pr-11 py-3 bg-slate-950/40 backdrop-blur-md border border-white/20 focus:border-cyan-400 focus:bg-slate-950/70 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 text-sm transition shadow-inner">
                   <!-- Tombol Mata Lihat / Sembunyikan Password -->
                   <button type="button" onclick="togglePasswordVisibility()" title="Lihat / Sembunyikan Password"
                     class="absolute right-3.5 top-3 text-slate-400 hover:text-cyan-400 transition">
@@ -1106,7 +1096,7 @@
         <span class="uppercase tracking-wider">Warta Dinas</span>
       </div>
       <div class="overflow-hidden whitespace-nowrap flex-1 relative">
-        <div class="marquee-track text-xs text-slate-200">
+        <div id="loginBulletinMarqueeTrack" class="marquee-track text-xs text-slate-200">
           <!-- ITEM SET 1 -->
           <span class="mx-5 inline-flex items-center gap-1.5"><strong class="text-amber-400">📢 Apel Pagi Gabungan:</strong> Seluruh ASN & Non-ASN Diskoperindag Banyuasin setiap Senin pukul 07.30 WIB di Lapangan Upacara.</span>
           <span class="mx-3 text-cyan-400 font-bold">•</span>
@@ -1198,6 +1188,120 @@
   </div>
 
   <!-- =====================================================================
+       MODAL PENGATURAN BULETIN KEDINASAN (LIVE ANNOUNCEMENT MANAGER)
+       Admin dapat mengubah pengumuman dinas sesuka hati
+       ===================================================================== -->
+  <div id="modalBulletinConfig" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-indigo-500/40 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 text-slate-800 dark:text-white max-h-[92vh] overflow-y-auto">
+      
+      <!-- Top Neon Line -->
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-cyan-400 to-amber-400 rounded-t-3xl"></div>
+
+      <!-- Header Modal -->
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xl">
+            <i class="fa-solid fa-bullhorn text-amber-500"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">Pusat Informasi & Buletin Kedinasan</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Atur pesan teks berjalan resmi yang tampil di halaman login</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeBulletinConfigModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Pratinjau Langsung (Live Preview Box) -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Pratinjau Teks Berjalan (Live Preview)
+        </label>
+        <div class="w-full bg-slate-950 border border-indigo-500/30 rounded-xl px-3 py-2.5 flex items-center overflow-hidden">
+          <div class="flex items-center gap-1.5 shrink-0 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mr-2.5 select-none">
+            <i class="fa-solid fa-bullhorn text-amber-300"></i>
+            <span>Warta Dinas</span>
+          </div>
+          <div class="overflow-hidden whitespace-nowrap flex-1">
+            <div id="bulletinLivePreviewText" class="text-xs text-slate-200 truncate">
+              Memuat pengumuman...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Textarea Input Pengumuman -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+            Daftar Pengumuman Dinas (Pisahkan dengan baris baru / Enter)
+          </label>
+          <span class="text-[11px] text-slate-400">1 baris = 1 poin pengumuman</span>
+        </div>
+        <textarea id="bulletinItemsInput" rows="6" oninput="updateBulletinPreviewFromInput()"
+          class="w-full p-3.5 bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700 focus:border-indigo-400 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition leading-relaxed"
+          placeholder="Tuliskan pengumuman dinas di sini..."></textarea>
+      </div>
+
+      <!-- Tombol Template Preset Cepat -->
+      <div class="space-y-2 bg-slate-50 dark:bg-slate-950/50 p-3.5 rounded-2xl border border-slate-200 dark:border-white/5">
+        <div class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+          <span>Template Pengumuman Resmi Siap Pakai (Klik untuk menambahkan ke daftar):</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" onclick="appendBulletinPreset('📢 Apel Pagi Gabungan: Seluruh ASN & Non-ASN Diskoperindag Banyuasin setiap Senin pukul 07.30 WIB di Lapangan Upacara.')"
+            class="text-[10px] px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25 transition">
+            + Apel Pagi
+          </button>
+          <button type="button" onclick="appendBulletinPreset('📅 Batas Pelaporan Bulanan: Rekapitulasi e-Kinerja dan penyerahan SPJ paling lambat tanggal 25 setiap bulannya.')"
+            class="text-[10px] px-2.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25 transition">
+            + Batas e-Kinerja
+          </button>
+          <button type="button" onclick="appendBulletinPreset('🎙️ Asisten Dikte Suara (id-ID): Gunakan tombol mikrofon untuk input sel lembar kerja handsfree cepat & akurat.')"
+            class="text-[10px] px-2.5 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-700 dark:text-rose-300 hover:bg-rose-500/25 transition">
+            + Dikte Suara
+          </button>
+          <button type="button" onclick="appendBulletinPreset('🔒 Keamanan Akun: Jaga kerahasiaan password. Sistem otomatis mengunci aplikasi setelah 5 menit tidak aktif.')"
+            class="text-[10px] px-2.5 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/25 transition">
+            + Keamanan 5 Menit
+          </button>
+          <button type="button" onclick="appendBulletinPreset('🏢 Layanan IT Diskoperindag: Hubungi Tim Admin / Helpdesk jika mengalami kendala sinkronisasi Google Drive.')"
+            class="text-[10px] px-2.5 py-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/25 transition">
+            + Helpdesk IT
+          </button>
+        </div>
+      </div>
+
+      <!-- Pengaturan Kecepatan Berjalan & Tombol Simpan -->
+      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 dark:border-slate-800 pt-3">
+        <div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+          <span>Kecepatan Teks:</span>
+          <select id="bulletinSpeedSelect"
+            class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-800 dark:text-white focus:outline-none">
+            <option value="60">Lambat (60 detik)</option>
+            <option value="45" selected>Sedang (45 detik)</option>
+            <option value="30">Cepat (30 detik)</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeBulletinConfigModal()"
+            class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition">
+            Batal
+          </button>
+          <button type="button" onclick="saveBulletinConfig()"
+            class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Simpan Perubahan Buletin</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =====================================================================
        2. HALAMAN DASHBOARD ADMIN
        ===================================================================== -->
   <div id="adminSection" class="hidden flex-1 flex flex-col transition-all duration-300">
@@ -1213,32 +1317,61 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <!-- TOMBOL BARU: PENGATURAN BRANDING LOGO & BACKGROUND KANTOR -->
+        <!-- TOMBOL BRANDING LOGO & BACKGROUND KANTOR -->
         <button type="button" onclick="openBrandingModal()"
           class="px-3.5 py-2 bg-amber-500/15 hover:bg-amber-500 border border-amber-500/40 text-amber-700 dark:text-amber-300 hover:text-slate-950 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
           <i class="fa-solid fa-palette"></i>
           <span>Branding Kantor</span>
         </button>
 
-        <button type="button" onclick="refreshAdminData(true)" id="btnSyncAdmin"
-          class="px-3.5 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-xl flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-rotate"></i>
-          <span>Sinkronkan Baris</span>
-        </button>
+        <!-- TOMBOL DROPDOWN: KELOLA BULETIN & AKSI SISTEM TERPADU (CLEAN HEADER) -->
+        <div class="relative inline-block text-left" id="adminMenuDropdownWrapper">
+          <button type="button" onclick="toggleAdminMenuDropdown(event)" id="btnAdminMenuDropdown"
+            class="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600/35 border border-indigo-500/40 text-indigo-700 dark:text-indigo-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-sm">
+            <i class="fa-solid fa-bullhorn text-amber-400"></i>
+            <span>Kelola Buletin</span>
+            <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i>
+          </button>
 
-        <!-- TOMBOL PAKSA SEMUA STAF OFFLINE -->
-        <button type="button" onclick="confirmForceAllStaffOffline()" id="btnForceAllOffline"
-          class="px-3.5 py-2 bg-rose-500/15 hover:bg-rose-600 border border-rose-500/30 text-rose-600 dark:text-rose-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition"
-          title="Paksa dan putuskan status sesi aktif seluruh staf pegawai menjadi Offline">
-          <i class="fa-solid fa-power-off"></i>
-          <span>Paksa Semua Offline</span>
-        </button>
+          <!-- MENU DROPDOWN KELOLA BULETIN & AKSI (BERSIH & TERPADU) -->
+          <div id="adminMenuDropdown" class="hidden absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-indigo-500/40 shadow-2xl py-2 z-50 text-xs divide-y divide-slate-100 dark:divide-slate-800">
+            <!-- Poin Utama: Kelola Buletin Kedinasan -->
+            <div class="p-1.5">
+              <button type="button" onclick="openBulletinConfigModal(); closeAdminMenuDropdown();"
+                class="w-full text-left px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-bold flex items-center gap-2.5 transition">
+                <i class="fa-solid fa-bullhorn text-amber-500 w-4 text-center"></i>
+                <div>
+                  <div>Kelola Buletin Kedinasan</div>
+                  <div class="text-[10px] font-normal text-slate-500 dark:text-slate-400">Edit teks warta berjalan di login</div>
+                </div>
+              </button>
+            </div>
 
-        <button type="button" onclick="openAddStaffModal()"
-          class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-user-plus"></i>
-          <span>Tambah Staf & Sheet</span>
-        </button>
+            <!-- Tombol-tombol yang digabungkan agar header clean -->
+            <div class="p-1.5 space-y-1">
+              <button type="button" onclick="refreshAdminData(true); closeAdminMenuDropdown();" id="btnSyncAdmin"
+                class="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center gap-2.5 transition">
+                <i class="fa-solid fa-rotate text-cyan-500 w-4 text-center"></i>
+                <span>Sinkronkan Baris</span>
+              </button>
+              <button type="button" onclick="confirmForceAllStaffOffline(); closeAdminMenuDropdown();" id="btnForceAllOffline"
+                class="w-full text-left px-3 py-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center gap-2.5 transition">
+                <i class="fa-solid fa-power-off text-rose-500 w-4 text-center"></i>
+                <span>Paksa Semua Offline</span>
+              </button>
+              <button type="button" onclick="openAddStaffModal(); closeAdminMenuDropdown();"
+                class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center gap-2.5 transition">
+                <i class="fa-solid fa-user-plus text-emerald-500 w-4 text-center"></i>
+                <span>Tambah Staf & Sheet</span>
+              </button>
+              <button type="button" onclick="triggerPwaInstall(); closeAdminMenuDropdown();" id="btnAdminDropdownPwa"
+                class="w-full text-left px-3 py-2 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center gap-2.5 transition">
+                <i class="fa-solid fa-mobile-screen-button text-cyan-500 w-4 text-center"></i>
+                <span>Install Aplikasi (PWA)</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <!-- INDIKATOR STATUS JARINGAN -->
         <div id="adminNetworkStatusPill" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
@@ -1252,13 +1385,6 @@
           title="Buka Modul e-Digital Kinerja Pegawai G-MONITOR">
           <i class="fa-solid fa-chart-line text-slate-950"></i>
           <span>e-Digital Kinerja Pegawai</span>
-        </button>
-
-        <!-- TOMBOL INSTALL PWA (OTOMATIS MUNCUL) -->
-        <button type="button" onclick="triggerPwaInstall()"
-          class="pwa-install-btn hidden px-3 py-2 bg-indigo-500/15 hover:bg-indigo-500 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-download"></i>
-          <span>Install App</span>
         </button>
 
         <button type="button" onclick="handleLogout()"
@@ -2965,11 +3091,38 @@
       heatSparks: [],
       butterflies: [],
       stars: [],
-      fireflies: []
+      fireflies: [],
+      imsakParticles: [],
+      terbitParticles: []
     };
 
     function getEffectiveWeatherMode() {
       if (currentWeatherMode !== 'auto') return currentWeatherMode;
+
+      // Deteksi Otomatis Waktu Imsak & Terbit Fajar dari data Aladhan
+      try {
+        var now = new Date();
+        var curMinutes = now.getHours() * 60 + now.getMinutes();
+
+        if (prayerTimings && prayerTimings.Imsak && prayerTimings.Subuh) {
+          var imsakParts = prayerTimings.Imsak.split(':');
+          var imsakMin = parseInt(imsakParts[0], 10) * 60 + parseInt(imsakParts[1], 10);
+          var subuhParts = prayerTimings.Subuh.split(':');
+          var subuhMin = parseInt(subuhParts[0], 10) * 60 + parseInt(subuhParts[1], 10);
+          if (curMinutes >= imsakMin && curMinutes <= subuhMin) {
+            return 'imsak';
+          }
+        }
+
+        if (prayerTimings && prayerTimings.Terbit) {
+          var terbitParts = prayerTimings.Terbit.split(':');
+          var terbitMin = parseInt(terbitParts[0], 10) * 60 + parseInt(terbitParts[1], 10);
+          if (curMinutes >= terbitMin && curMinutes <= (terbitMin + 35)) {
+            return 'terbit';
+          }
+        }
+      } catch (err) {}
+
       var hour = new Date().getHours();
       if (hour >= 5 && hour < 11) return 'morning';
       if (hour >= 11 && hour < 15) return 'noon';
@@ -2994,6 +3147,8 @@
       var effective = getEffectiveWeatherMode();
       var config = {
         auto: { icon: 'fa-wand-magic-sparkles', label: 'Suasana: Otomatis (' + getModeDisplayName(effective) + ')' },
+        imsak: { icon: 'fa-moon', label: 'Waktu Imsak (Basmalah Melayang)' },
+        terbit: { icon: 'fa-sun', label: 'Waktu Terbit (Doa Memulai Kerja)' },
         morning: { icon: 'fa-dove', label: 'Pagi Ceria (Burung)' },
         noon: { icon: 'fa-sun', label: 'Siang Hangat (Matahari)' },
         sunset: { icon: 'fa-cloud-sun', label: 'Sore Sunset (Kupu-kupu)' },
@@ -3008,12 +3163,60 @@
     }
 
     function getModeDisplayName(mode) {
+      if (mode === 'imsak') return 'Imsak';
+      if (mode === 'terbit') return 'Terbit';
       if (mode === 'morning') return 'Pagi';
       if (mode === 'noon') return 'Siang';
       if (mode === 'sunset') return 'Sore';
       if (mode === 'night') return 'Malam';
       if (mode === 'rain') return 'Hujan';
       return 'Statis';
+    }
+
+    function updateSpiritualOverlay(mode) {
+      var overlay = document.getElementById('spiritualFloatingOverlay');
+      var content = document.getElementById('spiritualCardContent');
+      if (!overlay || !content) return;
+
+      if (mode === 'imsak') {
+        content.className = 'floating-spiritual-box p-5 sm:p-6 rounded-3xl bg-slate-950/85 border border-indigo-400/50 backdrop-blur-2xl shadow-[0_0_50px_rgba(99,102,241,0.35)] text-center space-y-2 select-none';
+        content.innerHTML = [
+          '<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/40 text-indigo-300 text-xs font-bold mb-1">',
+          '  <i class="fa-solid fa-moon text-indigo-400"></i>',
+          '  <span>WAKTU IMSAK • PENGINGAT MENJELANG SUBUH</span>',
+          '</div>',
+          '<div class="text-2xl sm:text-3xl font-serif text-indigo-100 tracking-wide font-bold py-1 leading-relaxed">',
+          '  بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+          '</div>',
+          '<div class="text-xs sm:text-sm font-semibold text-cyan-300 italic">',
+          '  "Bismillāhir-raḥmānir-raḥīm"',
+          '</div>',
+          '<div class="text-[11px] sm:text-xs text-slate-300 max-w-md mx-auto leading-relaxed">',
+          '  Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang. Waktu Imsak tiba, bersiap menyambut fajar Subuh dan mengawali hari penuh keberkahan.',
+          '</div>'
+        ].join('\n');
+        overlay.classList.remove('hidden');
+      } else if (mode === 'terbit') {
+        content.className = 'floating-spiritual-box p-5 sm:p-6 rounded-3xl bg-slate-950/85 border border-amber-400/50 backdrop-blur-2xl shadow-[0_0_50px_rgba(251,191,36,0.4)] text-center space-y-2 select-none';
+        content.innerHTML = [
+          '<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold mb-1">',
+          '  <i class="fa-solid fa-sun text-amber-400 animate-spin" style="animation-duration: 16s;"></i>',
+          '  <span>WAKTU TERBIT FAJAR • DOA MEMULAI AKTIVITAS KERJA</span>',
+          '</div>',
+          '<div class="text-xl sm:text-2xl font-serif text-amber-300 tracking-wide font-bold py-1 leading-relaxed">',
+          '  بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
+          '</div>',
+          '<div class="text-xs sm:text-sm font-semibold text-amber-200 italic">',
+          '  "Bismillāhi tawakkaltu \'alallāhi, lā ḥawla wa lā quwwata illā billāh"',
+          '</div>',
+          '<div class="text-[11px] sm:text-xs text-slate-200 max-w-lg mx-auto leading-relaxed">',
+          '  "Dengan nama Allah, aku bertawakal kepada Allah. Tiada daya dan kekuatan melainkan dengan pertolongan Allah." Selamat beraktivitas & mengabdi dengan ikhlas di Diskoperindag Banyuasin.',
+          '</div>'
+        ].join('\n');
+        overlay.classList.remove('hidden');
+      } else {
+        overlay.classList.add('hidden');
+      }
     }
 
     function selectWeatherMode(mode) {
@@ -3030,6 +3233,8 @@
 
       var modeTitles = {
         auto: 'Suasana Otomatis Aktif',
+        imsak: 'Suasana Waktu Imsak (Basmalah Melayang) Aktif',
+        terbit: 'Suasana Waktu Terbit (Doa Memulai Kerja) Aktif',
         morning: 'Suasana Pagi Ceria Aktif',
         noon: 'Suasana Siang Hangat Aktif',
         sunset: 'Suasana Sore Sunset Aktif',
@@ -3052,8 +3257,39 @@
       weatherParticles.butterflies = [];
       weatherParticles.stars = [];
       weatherParticles.fireflies = [];
+      weatherParticles.imsakParticles = [];
+      weatherParticles.terbitParticles = [];
 
-      if (mode === 'rain') {
+      updateSpiritualOverlay(mode);
+
+      if (mode === 'imsak') {
+        // Partikel kabut fajar bersinar mistis & debu kosmik melayang
+        for (var im = 0; im < 45; im++) {
+          weatherParticles.imsakParticles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            radius: 1.2 + Math.random() * 2.8,
+            vy: -0.4 - Math.random() * 0.9,
+            phase: Math.random() * Math.PI * 2,
+            speed: 0.02 + Math.random() * 0.03,
+            baseAlpha: 0.35 + Math.random() * 0.55
+          });
+        }
+      } else if (mode === 'terbit') {
+        // Percikan keemasan fajar melayang mengelilingi halaman
+        for (var tb = 0; tb < 40; tb++) {
+          weatherParticles.terbitParticles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            vx: (Math.random() - 0.5) * 0.9,
+            vy: -0.6 - Math.random() * 1.2,
+            radius: 1.5 + Math.random() * 3,
+            phase: Math.random() * Math.PI * 2,
+            speed: 0.03 + Math.random() * 0.04,
+            baseAlpha: 0.4 + Math.random() * 0.55
+          });
+        }
+      } else if (mode === 'rain') {
         for (var i = 0; i < 70; i++) {
           weatherParticles.drops.push({
             x: Math.random() * (w + 120),
@@ -3181,8 +3417,85 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         var currentEffective = getEffectiveWeatherMode();
 
-        // 1. MODE HUJAN HALUS
-        if (currentEffective === 'rain') {
+        // 1. MODE WAKTU IMSAK (SAPPHIRE DAWN GLOW & BASMALAH CELESTIAL PARTICLES)
+        if (currentEffective === 'imsak') {
+          var imsakGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+          imsakGrad.addColorStop(0, 'rgba(49, 46, 129, 0.28)'); // deep sapphire
+          imsakGrad.addColorStop(0.5, 'rgba(30, 27, 75, 0.18)');
+          imsakGrad.addColorStop(1, 'rgba(15, 23, 42, 0.35)');
+          ctx.fillStyle = imsakGrad;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          var imsakP = weatherParticles.imsakParticles;
+          for (var ip = 0; ip < imsakP.length; ip++) {
+            var p = imsakP[ip];
+            p.phase += p.speed;
+            var alpha = (Math.sin(p.phase) + 1) * 0.5 * p.baseAlpha;
+            ctx.save();
+            ctx.shadowColor = '#818cf8';
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = 'rgba(199, 210, 254, ' + alpha.toFixed(3) + ')';
+            ctx.beginPath();
+            ctx.arc(p.x + Math.sin(p.phase) * 6, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            p.y += p.vy;
+            if (p.y < -15) {
+              p.y = canvas.height + 15;
+              p.x = Math.random() * canvas.width;
+            }
+          }
+        }
+
+        // 2. MODE WAKTU TERBIT (GOLDEN SUNRISE AURA & DOA MULAI KERJA SPARKS)
+        else if (currentEffective === 'terbit') {
+          var terbitGrad = ctx.createLinearGradient(0, canvas.height * 0.4, 0, canvas.height);
+          terbitGrad.addColorStop(0, 'rgba(251, 191, 36, 0)');
+          terbitGrad.addColorStop(0.6, 'rgba(245, 158, 11, 0.22)');
+          terbitGrad.addColorStop(1, 'rgba(217, 119, 6, 0.36)');
+          ctx.fillStyle = terbitGrad;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // Piringan matahari fajar terbit di cakrawala tengah
+          var terbitSunX = canvas.width * 0.5;
+          var terbitSunY = canvas.height * 0.95;
+          var sunGlow = ctx.createRadialGradient(terbitSunX, terbitSunY, 15, terbitSunX, terbitSunY, 260);
+          sunGlow.addColorStop(0, 'rgba(254, 240, 138, 0.38)');
+          sunGlow.addColorStop(0.4, 'rgba(251, 191, 36, 0.18)');
+          sunGlow.addColorStop(1, 'rgba(251, 191, 36, 0)');
+          ctx.fillStyle = sunGlow;
+          ctx.beginPath();
+          ctx.arc(terbitSunX, terbitSunY, 260, 0, Math.PI * 2);
+          ctx.fill();
+
+          var terbitP = weatherParticles.terbitParticles;
+          for (var tp = 0; tp < terbitP.length; tp++) {
+            var tItem = terbitP[tp];
+            tItem.phase += tItem.speed;
+            var tAlpha = (Math.sin(tItem.phase) + 1) * 0.5 * tItem.baseAlpha;
+            ctx.save();
+            ctx.shadowColor = '#f59e0b';
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = 'rgba(253, 224, 71, ' + tAlpha.toFixed(3) + ')';
+            ctx.beginPath();
+            ctx.arc(tItem.x + Math.sin(tItem.phase) * 8, tItem.y, tItem.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            tItem.y += tItem.vy;
+            tItem.x += tItem.vx;
+            if (tItem.y < -15) {
+              tItem.y = canvas.height + 15;
+              tItem.x = Math.random() * canvas.width;
+            }
+            if (tItem.x > canvas.width + 15) tItem.x = -15;
+            if (tItem.x < -15) tItem.x = canvas.width + 15;
+          }
+        }
+
+        // 3. MODE HUJAN HALUS
+        else if (currentEffective === 'rain') {
           var drops = weatherParticles.drops;
           for (var i = 0; i < drops.length; i++) {
             var d = drops[i];
@@ -3203,7 +3516,7 @@
           }
         }
 
-        // 2. MODE PAGI CERIA (BURUNG-BURUNG LUCU BERTERBANGAN)
+        // 4. MODE PAGI CERIA (BURUNG-BURUNG LUCU BERTERBANGAN)
         else if (currentEffective === 'morning') {
           // Gradasi lembut fajar di cakrawala atas
           var dawnGrad = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.45);
@@ -3252,7 +3565,7 @@
           }
         }
 
-        // 3. MODE SIANG HANGAT (MATAHARI BERSINAR & GELOMBANG HANGAT)
+        // 5. MODE SIANG HANGAT (MATAHARI BERSINAR & GELOMBANG HANGAT)
         else if (currentEffective === 'noon') {
           var sunX = canvas.width * 0.18;
           var sunY = canvas.height * 0.18;
@@ -3298,7 +3611,7 @@
           }
         }
 
-        // 4. MODE SORE SUNSET (LEMBAYUNG SENJA & KUPU-KUPU TERBANG)
+        // 6. MODE SORE SUNSET (LEMBAYUNG SENJA & KUPU-KUPU TERBANG)
         else if (currentEffective === 'sunset') {
           // Lembayung sunset oranye-keemasan di cakrawala bawah
           var sunsetGrad = ctx.createLinearGradient(0, canvas.height * 0.35, 0, canvas.height);
@@ -3349,7 +3662,7 @@
           }
         }
 
-        // 5. MODE LANGIT MALAM (BULAN, BINTANG BERKERLIP & KUNANG-KUNANG)
+        // 7. MODE LANGIT MALAM (BULAN, BINTANG BERKERLIP & KUNANG-KUNANG)
         else if (currentEffective === 'night') {
           // Bulan Sabit Elegan di Pojok Atas
           var moonX = canvas.width * 0.84;
@@ -3535,6 +3848,172 @@
       openPublicVerificationModal(code);
     }
 
+    // =====================================================================
+    // 📢 FITUR PUSAT INFORMASI & BULETIN KEDINASAN (LIVE OFFICE BULLETIN)
+    // Admin dapat mengatur teks warta dinas berjalan & kecepatan sesuka hati
+    // =====================================================================
+    var DEFAULT_BULLETIN_CONFIG = {
+      speed: 45,
+      items: [
+        '📢 Apel Pagi Gabungan: Seluruh ASN & Non-ASN Diskoperindag Banyuasin setiap Senin pukul 07.30 WIB di Lapangan Upacara.',
+        '📅 Batas Pelaporan Bulanan: Rekapitulasi e-Kinerja dan penyerahan SPJ paling lambat tanggal 25 setiap bulannya.',
+        '🎙️ Asisten Dikte Suara (id-ID): Gunakan tombol mikrofon untuk input sel lembar kerja handsfree cepat & akurat.',
+        '🔒 Keamanan Akun: Jaga kerahasiaan password. Sistem otomatis mengunci aplikasi setelah 5 menit tidak aktif.',
+        '🏢 Layanan IT Diskoperindag: Hubungi Tim Admin / Helpdesk jika mengalami kendala sinkronisasi Google Drive.'
+      ]
+    };
+
+    function getBulletinConfig() {
+      try {
+        var raw = localStorage.getItem('gmonitor_office_bulletin');
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return DEFAULT_BULLETIN_CONFIG;
+    }
+
+    function renderLoginBulletinTicker() {
+      var track = document.getElementById('loginBulletinMarqueeTrack');
+      if (!track) return;
+
+      var config = getBulletinConfig();
+      var items = config.items || [];
+      if (items.length === 0) items = DEFAULT_BULLETIN_CONFIG.items;
+
+      var speedSec = config.speed || 45;
+      track.style.animationDuration = speedSec + 's';
+
+      var colors = ['text-amber-400', 'text-emerald-400', 'text-indigo-400', 'text-rose-400', 'text-cyan-400', 'text-purple-400'];
+      var htmlFragments = [];
+
+      // Dibuat 2 putaran identik untuk seamless looping marquee tanpa putus
+      for (var loop = 0; loop < 2; loop++) {
+        for (var i = 0; i < items.length; i++) {
+          var itemText = items[i];
+          var colorClass = colors[i % colors.length];
+
+          var parts = itemText.split(':');
+          var itemHtml = '';
+          if (parts.length > 1) {
+            var header = parts[0].trim() + ':';
+            var body = parts.slice(1).join(':').trim();
+            itemHtml = '<span class="mx-5 inline-flex items-center gap-1.5"><strong class="' + colorClass + '">' + escapeHtml(header) + '</strong> ' + escapeHtml(body) + '</span>';
+          } else {
+            itemHtml = '<span class="mx-5 inline-flex items-center gap-1.5"><strong class="' + colorClass + '">📢 Warta:</strong> ' + escapeHtml(itemText) + '</span>';
+          }
+          htmlFragments.push(itemHtml);
+          htmlFragments.push('<span class="mx-3 text-cyan-400 font-bold">•</span>');
+        }
+      }
+
+      track.innerHTML = htmlFragments.join('');
+    }
+
+    function openBulletinConfigModal() {
+      var modal = document.getElementById('modalBulletinConfig');
+      if (!modal) return;
+      var config = getBulletinConfig();
+      var textarea = document.getElementById('bulletinItemsInput');
+      var speedSelect = document.getElementById('bulletinSpeedSelect');
+      if (textarea) textarea.value = (config.items || []).join('\n');
+      if (speedSelect) speedSelect.value = String(config.speed || 45);
+
+      updateBulletinPreviewFromInput();
+      modal.classList.remove('hidden');
+    }
+
+    function closeBulletinConfigModal() {
+      var modal = document.getElementById('modalBulletinConfig');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function updateBulletinPreviewFromInput() {
+      var textarea = document.getElementById('bulletinItemsInput');
+      var previewEl = document.getElementById('bulletinLivePreviewText');
+      if (!textarea || !previewEl) return;
+      var lines = textarea.value.split('\n').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+      if (lines.length === 0) {
+        previewEl.textContent = 'Belum ada pengumuman dimasukkan.';
+      } else {
+        previewEl.textContent = lines.join('  •  ');
+      }
+    }
+
+    function appendBulletinPreset(text) {
+      var textarea = document.getElementById('bulletinItemsInput');
+      if (!textarea) return;
+      var current = textarea.value.trim();
+      if (current.length > 0) {
+        textarea.value = current + '\n' + text;
+      } else {
+        textarea.value = text;
+      }
+      updateBulletinPreviewFromInput();
+      textarea.focus();
+    }
+
+    function saveBulletinConfig() {
+      var textarea = document.getElementById('bulletinItemsInput');
+      var speedSelect = document.getElementById('bulletinSpeedSelect');
+      if (!textarea) return;
+
+      var lines = textarea.value.split('\n').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+      if (lines.length === 0) {
+        showCosmicToast({
+          type: 'error',
+          title: 'PENGUMUMAN KOSONG',
+          message: 'Minimal masukkan 1 poin pengumuman dinas.',
+          duration: 3000
+        });
+        textarea.focus();
+        return;
+      }
+
+      var speed = parseInt(speedSelect ? speedSelect.value : '45', 10) || 45;
+      var newConfig = {
+        speed: speed,
+        items: lines,
+        updatedAt: new Date().toISOString()
+      };
+
+      try {
+        localStorage.setItem('gmonitor_office_bulletin', JSON.stringify(newConfig));
+      } catch (e) {
+        console.warn('Gagal menyimpan buletin ke localStorage:', e);
+      }
+
+      renderLoginBulletinTicker();
+      closeBulletinConfigModal();
+
+      showCosmicToast({
+        type: 'success',
+        title: 'BULETIN KEDINASAN DIPERBARUI',
+        message: 'Teks warta berjalan halaman login berhasil disimpan dan aktif!',
+        duration: 3000
+      });
+    }
+
+    // =====================================================================
+    // 📢 MENU DROPDOWN HEADER ADMIN: KELOLA BULETIN & AKSI (CLEAN HEADER)
+    // =====================================================================
+    function toggleAdminMenuDropdown(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      var menu = document.getElementById('adminMenuDropdown');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    function closeAdminMenuDropdown() {
+      var menu = document.getElementById('adminMenuDropdown');
+      if (menu) menu.classList.add('hidden');
+    }
+
     window.addEventListener('DOMContentLoaded', function() {
       initThemeMode();
       updateDynamicGreeting();
@@ -3543,6 +4022,7 @@
       fetchPrayerTimesAladhan();
       fetchWeatherAndAirQuality();
       initLoginWeatherCanvas();
+      renderLoginBulletinTicker();
       initCapsLockDetector();
       initLoginCard3DTilt();
       checkUrlForPublicVerification();
@@ -3553,6 +4033,7 @@
         var pw = document.getElementById('prayerWrapper');
         var ww = document.getElementById('weatherWrapper');
         var wdw = document.getElementById('weatherDropdownWrapper');
+        var amdw = document.getElementById('adminMenuDropdownWrapper');
         if (pw && !pw.contains(e.target)) {
           var pd = document.getElementById('prayerDropdown');
           if (pd) pd.classList.add('hidden');
@@ -3564,6 +4045,10 @@
         if (wdw && !wdw.contains(e.target)) {
           var wdm = document.getElementById('weatherDropdownMenu');
           if (wdm) wdm.classList.add('hidden');
+        }
+        if (amdw && !amdw.contains(e.target)) {
+          var amd = document.getElementById('adminMenuDropdown');
+          if (amd) amd.classList.add('hidden');
         }
       });
     });
@@ -4021,6 +4506,7 @@
     }
 
     function startRealtimeClockAndPrayerChecker() {
+      var lastAutoWeatherMode = '';
       setInterval(function() {
         var now = new Date();
         var hh = padZero(now.getHours());
@@ -4040,6 +4526,16 @@
               lastTriggeredPrayerKey = triggerKey;
               triggerAutomaticAzan(pName);
             }
+          }
+        }
+
+        // Periksa transisi suasana otomatis pada waktu Imsak & Terbit
+        if (currentWeatherMode === 'auto' && ss === '00') {
+          var effectiveMode = getEffectiveWeatherMode();
+          if (effectiveMode !== lastAutoWeatherMode) {
+            lastAutoWeatherMode = effectiveMode;
+            updateWeatherSelectorUI();
+            restartWeatherCanvas();
           }
         }
       }, 1000);
