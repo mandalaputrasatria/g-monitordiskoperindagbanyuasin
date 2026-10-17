@@ -609,6 +609,13 @@ app.post('/api/gas-call', async (req, res) => {
       console.log(`[GAS Live Sync] ${functionName} -> Mengirim ke Google Apps Script...`);
       const liveResult = await forwardToGoogleAppsScript(functionName, a);
       console.log(`[GAS Live Sync] ${functionName} -> Berhasil direspons dari Google Apps Script.`);
+
+      // Sinkronkan juga perubahan status offline ke database lokal
+      if (functionName === 'updateStaffData') {
+        try { updateStaffData(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9]); } catch (e) {}
+      } else if (functionName === 'forceAllStaffOffline') {
+        try { forceAllStaffOffline(); } catch (e) {}
+      }
       return res.json(liveResult);
     } catch (gasErr) {
       console.warn(`[GAS Notice] ${functionName} (${gasErr.message}). Menggunakan penyimpanan lokal cadangan...`);

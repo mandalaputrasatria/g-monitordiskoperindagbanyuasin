@@ -233,25 +233,27 @@ function getConfigMap() {
 function getUserColumnsMap(headerRow) {
   const map = {};
   for (let c = 0; c < headerRow.length; c++) {
-    map[String(headerRow[c]).trim()] = c;
+    const raw = String(headerRow[c]).trim();
+    map[raw] = c;
+    map[raw.toLowerCase()] = c;
   }
-  const hasNip = map['NIP'] !== undefined;
+  const hasNip = (map['nip'] !== undefined);
   return {
-    id: map['ID_Staf'] !== undefined ? map['ID_Staf'] : 0,
-    nama: map['Nama_Lengkap'] !== undefined ? map['Nama_Lengkap'] : 1,
-    nip: hasNip ? map['NIP'] : -1,
-    jabatan: map['Jabatan'] !== undefined ? map['Jabatan'] : -1,
-    unitKerja: map['Unit_Kerja'] !== undefined ? map['Unit_Kerja'] : -1,
-    noWa: map['No_WA'] !== undefined ? map['No_WA'] : -1,
-    fotoUrl: map['Foto_URL'] !== undefined ? map['Foto_URL'] : -1,
-    username: map['Username'] !== undefined ? map['Username'] : (hasNip ? 7 : 2),
-    password: map['Password'] !== undefined ? map['Password'] : (hasNip ? 8 : 3),
-    role: map['Role'] !== undefined ? map['Role'] : (hasNip ? 9 : 4),
-    sheetId: map['Sheet_ID_Aktif'] !== undefined ? map['Sheet_ID_Aktif'] : (hasNip ? 10 : 5),
-    sheetUrl: map['Sheet_URL_Aktif'] !== undefined ? map['Sheet_URL_Aktif'] : (hasNip ? 11 : 6),
-    lastActive: map['Last_Active_Ms'] !== undefined ? map['Last_Active_Ms'] : (hasNip ? 12 : 7),
-    status: map['Status_Manual'] !== undefined ? map['Status_Manual'] : (hasNip ? 13 : 8),
-    totalBaris: map['Total_Baris'] !== undefined ? map['Total_Baris'] : (hasNip ? 14 : 9)
+    id: map['id_staf'] !== undefined ? map['id_staf'] : (map['id'] !== undefined ? map['id'] : 0),
+    nama: map['nama_lengkap'] !== undefined ? map['nama_lengkap'] : (map['nama'] !== undefined ? map['nama'] : 1),
+    nip: hasNip ? map['nip'] : -1,
+    jabatan: map['jabatan'] !== undefined ? map['jabatan'] : -1,
+    unitKerja: map['unit_kerja'] !== undefined ? map['unit_kerja'] : -1,
+    noWa: map['no_wa'] !== undefined ? map['no_wa'] : (map['nowa'] !== undefined ? map['nowa'] : -1),
+    fotoUrl: map['foto_url'] !== undefined ? map['foto_url'] : -1,
+    username: map['username'] !== undefined ? map['username'] : (hasNip ? 7 : 2),
+    password: map['password'] !== undefined ? map['password'] : (hasNip ? 8 : 3),
+    role: map['role'] !== undefined ? map['role'] : (hasNip ? 9 : 4),
+    sheetId: map['sheet_id_aktif'] !== undefined ? map['sheet_id_aktif'] : (map['sheet_id'] !== undefined ? map['sheet_id'] : (hasNip ? 10 : 5)),
+    sheetUrl: map['sheet_url_aktif'] !== undefined ? map['sheet_url_aktif'] : (map['sheet_url'] !== undefined ? map['sheet_url'] : (hasNip ? 11 : 6)),
+    lastActive: map['last_active_ms'] !== undefined ? map['last_active_ms'] : (map['last_active'] !== undefined ? map['last_active'] : (hasNip ? 12 : 7)),
+    status: map['status_manual'] !== undefined ? map['status_manual'] : (map['status'] !== undefined ? map['status'] : (hasNip ? 13 : 8)),
+    totalBaris: map['total_baris'] !== undefined ? map['total_baris'] : (hasNip ? 14 : 9)
   };
 }
 

@@ -2431,6 +2431,27 @@
         }, { passive: true });
       });
 
+      // Deteksi Sinyal Paksa Offline Instan dari Administrator (Antar-Tab / Antar-Jendela Browser)
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'gv_force_offline_signal' && e.newValue) {
+          try {
+            var sig = JSON.parse(e.newValue);
+            if (currentUser && currentUser.role === 'STAF') {
+              if (sig.username === 'ALL' || String(sig.staffId).trim() === String(currentUser.id).trim() || String(sig.username).toLowerCase() === String(currentUser.username).toLowerCase()) {
+                var staffNama = currentUser.nama || 'Staf Pegawai';
+                handleLogout({
+                  type: 'logout',
+                  title: 'SESI DINONAKTIFKAN ADMIN 🔒',
+                  message: staffNama,
+                  subDetail: 'Administrator baru saja menonaktifkan status sesi kerja aktif Anda di sistem.',
+                  duration: 5000
+                });
+              }
+            }
+          } catch (err) {}
+        }
+      });
+
       // Deteksi ketika staf/admin berpindah ke tab lain atau meminimalkan browser
       document.addEventListener('visibilitychange', function() {
         if (!currentUser) return;
@@ -2440,12 +2461,11 @@
           if (idleDuration >= INACTIVITY_TIMEOUT_MS) {
             var roleLabel = (currentUser.role === 'ADMIN') ? 'Administrator' : 'Staf Pegawai';
             inactivityWarningShown = false;
-            handleLogout();
-            showCosmicToast({
+            handleLogout({
               type: 'logout',
               title: 'SESI DIKUNCI OTOMATIS 🔒',
               message: 'Inaktivitas 5 Menit (' + roleLabel + ')',
-              subDetail: 'Halaman web tidak disentuh selama 5 menit. Sesi dikunci demi keamanan.',
+              subDetail: 'Lembar kerja telah ditutup & sesi dikunci otomatis karena tab ditinggalkan lebih dari 5 menit.',
               duration: 5000
             });
           }
@@ -2465,7 +2485,7 @@
             type: 'logout',
             title: 'PERINGATAN INAKTIVITAS ⏳',
             message: 'Sesi ' + roleLabel + ' Berakhir dalam 60 Detik',
-            subDetail: 'Gerakkan mouse, ketik, atau bicara ke mikrofon untuk memperpanjang sesi',
+            subDetail: 'Gerakkan mouse atau ketik di halaman ini untuk memperpanjang sesi lembar kerja',
             duration: 6000
           });
         }
@@ -2473,13 +2493,12 @@
         // Eksekusi auto-logout jika melewati batas 5 menit
         if (idleDuration >= INACTIVITY_TIMEOUT_MS) {
           inactivityWarningShown = false;
-          handleLogout();
-          showCosmicToast({
+          handleLogout({
             type: 'logout',
             title: 'SESI DIKUNCI OTOMATIS 🔒',
             message: 'Inaktivitas 5 Menit (' + roleLabel + ')',
-            subDetail: 'Sesi ' + roleLabel + ' ditutup demi menjaga keamanan data dinas di meja kerja',
-            duration: 4500
+            subDetail: 'Lembar kerja telah ditutup dan sesi dikunci otomatis karena tidak ada aktivitas selama 5 menit.',
+            duration: 5000
           });
         }
       }, 5000);
@@ -4538,9 +4557,9 @@
         .loginUser(user, pass);
     }
 
-    function handleLogout() {
-      if (adminPollTimer) clearInterval(adminPollTimer);
-      if (staffHeartbeatTimer) clearInterval(staffHeartbeatTimer);
+    function handleLogout(customToastOpts) {
+      if (adminPollTimer) { clearInterval(adminPollTimer); adminPollTimer = null; }
+      if (staffHeartbeatTimer) { clearInterval(staffHeartbeatTimer); staffHeartbeatTimer = null; }
       if (isDictating) stopVoiceDictation();
 
       if (typeof window !== 'undefined' && window.luckysheet && window.luckysheet.destroy) {
@@ -4552,7 +4571,12 @@
       var namaStaf = currentUser ? currentUser.nama : 'Pengguna';
       var fotoStaf = currentUser ? currentUser.fotoUrl : '';
       var roleStaf = currentUser ? currentUser.role : '';
-      google.script.run.logoutUser(uName);
+
+      try {
+        if (google && google.script && google.script.run && uName) {
+          google.script.run.logoutUser(uName);
+        }
+      } catch (e) {}
 
       // DOM & State Sanitization: Bersihkan state pengguna dan DOM dari memori peramban
       currentUser = null;
@@ -4563,27 +4587,42 @@
       var pt = document.getElementById('printPaperStaffTableBody'); if (pt) pt.innerHTML = '';
       var ps = document.getElementById('printPaperSampleLogTableBody'); if (ps) ps.innerHTML = '';
 
-      // THE COSMIC PULSE (GLOW ORBIT) TOAST LOGOUT SUKSES!
-      showCosmicToast({
-        type: 'logout',
-        title: 'SAMPAI JUMPA!',
-        message: namaStaf,
-        subDetail: 'Sesi ' + (roleStaf === 'ADMIN' ? 'Admin' : 'Staf') + ' berhasil ditutup dengan aman',
-        avatar: fotoStaf,
-        showWave: true,
-        duration: 1600,
-        onComplete: function() {
-          document.getElementById('adminSection').classList.add('hidden');
-          document.getElementById('staffSection').classList.add('hidden');
-          document.getElementById('loginSection').classList.remove('hidden');
-          var passInput = document.getElementById('loginPassword');
-          if (passInput) passInput.value = '';
-          var userInput = document.getElementById('loginUsername');
-          if (userInput) userInput.value = '';
-          initLoginWeatherCanvas();
-          updateLoginLockoutUI();
-        }
-      });
+      // 1. KELUAR SEKETIKA DARI LEMBAR KERJA SPREADSHEET (BERSIHKAN SRC IFRAME LANGSUNG)
+      var iframe = document.getElementById('staffSheetIframe');
+      if (iframe) iframe.src = 'about:blank';
+      var previewIframe = document.getElementById('previewSheetIframe');
+      if (previewIframe) previewIframe.src = 'about:blank';
+
+      // 2. KELUAR OTOMATIS DARI TAMPILAN LEMBAR KERJA / DASHBOARD SEKETIKA
+      var adminSec = document.getElementById('adminSection');
+      var staffSec = document.getElementById('staffSection');
+      var loginSec = document.getElementById('loginSection');
+      if (adminSec) adminSec.classList.add('hidden');
+      if (staffSec) staffSec.classList.add('hidden');
+      if (loginSec) loginSec.classList.remove('hidden');
+
+      var passInput = document.getElementById('loginPassword');
+      if (passInput) passInput.value = '';
+      var userInput = document.getElementById('loginUsername');
+      if (userInput) userInput.value = '';
+
+      initLoginWeatherCanvas();
+      updateLoginLockoutUI();
+
+      // 3. TAMPILKAN TOAST NOTIFIKASI
+      if (customToastOpts) {
+        showCosmicToast(customToastOpts);
+      } else {
+        showCosmicToast({
+          type: 'logout',
+          title: 'SAMPAI JUMPA!',
+          message: namaStaf,
+          subDetail: 'Sesi ' + (roleStaf === 'ADMIN' ? 'Admin' : 'Staf') + ' berhasil ditutup dengan aman',
+          avatar: fotoStaf,
+          showWave: true,
+          duration: 1800
+        });
+      }
     }
 
     function openStaffWorkspace() {
@@ -4620,7 +4659,7 @@
       switchStaffViewTab('iframe');
 
       triggerHeartbeat(true);
-      staffHeartbeatTimer = setInterval(function() { triggerHeartbeat(true); }, 30000);
+      staffHeartbeatTimer = setInterval(function() { triggerHeartbeat(false); }, 10000);
     }
 
     function triggerHeartbeat(countRowsNow) {
@@ -4639,12 +4678,11 @@
             }
             if (isDictating) stopVoiceDictation();
             var staffNama = currentUser ? currentUser.nama : 'Staf Pegawai';
-            handleLogout();
-            showCosmicToast({
+            handleLogout({
               type: 'logout',
               title: 'SESI DINONAKTIFKAN ADMIN 🔒',
               message: staffNama,
-              subDetail: res.message || 'Administrator telah menonaktifkan sesi aktif Anda di sistem.',
+              subDetail: res.message || 'Administrator telah menonaktifkan status sesi kerja aktif Anda di sistem.',
               duration: 5000
             });
           }
@@ -5175,6 +5213,9 @@
                 sObj.status = 'OFFLINE';
                 renderStaffCards(currentStaffList);
               }
+              try {
+                localStorage.setItem('gv_force_offline_signal', JSON.stringify({ staffId: idStaf, username: sObj ? sObj.username : '', timestamp: Date.now() }));
+              } catch (e) {}
             }
             refreshAdminData(false);
             showCosmicToast({
@@ -5212,6 +5253,9 @@
             staf.status = 'OFFLINE';
             renderStaffCards(currentStaffList);
             refreshAdminData(false);
+            try {
+              localStorage.setItem('gv_force_offline_signal', JSON.stringify({ staffId: staffId, username: staf.username || '', timestamp: Date.now() }));
+            } catch (e) {}
             showCosmicToast({
               type: 'save',
               title: 'STAF BERHASIL DIOFFLINEKAN! 🔴',
@@ -5269,6 +5313,9 @@
               }
             }
             refreshAdminData(false);
+            try {
+              localStorage.setItem('gv_force_offline_signal', JSON.stringify({ staffId: staffId, username: '', timestamp: Date.now() }));
+            } catch (e) {}
             showCosmicToast({
               type: 'save',
               title: 'STAF BERHASIL DIOFFLINEKAN! 🔴',
@@ -5317,6 +5364,9 @@
               renderStaffCards(currentStaffList);
             }
             refreshAdminData(false);
+            try {
+              localStorage.setItem('gv_force_offline_signal', JSON.stringify({ staffId: 'ALL', username: 'ALL', timestamp: Date.now() }));
+            } catch (e) {}
             showCosmicToast({
               type: 'save',
               title: 'SEMUA STAF DIOFFLINEKAN! 🔴',
